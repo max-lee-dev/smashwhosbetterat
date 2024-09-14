@@ -33,6 +33,7 @@ export default function Component() {
   function handleChoice(choice: string) {
     // In a real game, you'd compare the actual character stats here
     if (!canSelect) return;
+    console.log(`You chose ${choice} for ${skills[currentSkill]}`)
     if (currentSkill === skills.length - 1) {
       nextQuestion()
     } else {
@@ -72,14 +73,14 @@ export default function Component() {
         <div className="w-[100%]  flex justify-between items-center mb-8">
           <button
             className="w-40 h-40 text-lg text-blue-950 font-bold border-2 border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-            onClick={() => handleChoice(1)}
+            onClick={() => handleChoice(char1)}
           >
             {char1}
           </button>
           <div className="text-2xl text-blue-950 font-bold">VS</div>
           <button
             className="w-40 h-40 text-lg text-blue-950 font-bold border-2 border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
-            onClick={() => handleChoice(2)}
+            onClick={() => handleChoice(char2)}
           >
             {char2}
           </button>
