@@ -298,7 +298,7 @@ export default function Component() {
                 <div className="w-[100%] pt-10 flex justify-between items-center mb-8">
                   <div className={"flex"}>
                     <button
-                      className={`min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
+                      className={`min-w-60  text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
                       onClick={() => handleChoice(char1)}
                     >
                       <div className={'flex font-mono flex-col items-center'}>
@@ -306,17 +306,19 @@ export default function Component() {
                           <img
                             src={CharacterPhotoUrls[char1]}
                             alt="avatar"
-                            className="h-64"
+                            className="h-80 p-10"
                           />
                         )}
-                        {char1}
+                        <text className={"pb-2"}>
+                          {char1}
+                        </text>
                       </div>
                     </button>
                   </div>
                   <div className={"flex"}>
 
                     <button
-                      className={`w-60  text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
+                      className={`min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
                       onClick={() => handleChoice(char2)}
                     >
                       <div className={'flex font-mono flex-col items-center'}>
@@ -324,10 +326,12 @@ export default function Component() {
                           <img
                             src={CharacterPhotoUrls[char2]}
                             alt="avatar"
-                            className="h-64"
+                            className="h-80 p-10"
                           />
                         )}
-                        {char2}
+                        <text className={"pb-2"}>
+                          {char2}
+                        </text>
                       </div>
                     </button>
 
@@ -335,7 +339,7 @@ export default function Component() {
                 </div>
               </div>
 
-              <div className="flex justify-center mt-20">
+              <div className="flex justify-center mt-4">
                 <button
                   className="px-12 py-1 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-colors"
                   onClick={newCharacters}
