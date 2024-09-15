@@ -2,6 +2,9 @@
 import {useEffect, useState} from 'react'
 import {doc, getDoc, setDoc, updateDoc} from '@firebase/firestore';
 import {db} from '@/firebase';
+import {CharacterPhotoUrls} from "@/app/files/photos";
+import Navbar from "@/app/components/Navbar";
+import Footer from "@/app/rankings/Footer";
 
 // Mock data - replace with actual Smash Bros Ultimate characters and skills
 const characters = [
@@ -11,9 +14,10 @@ const characters = [
   'Diddy Kong', 'Lucas', 'Sonic', 'King Dedede', 'Olimar', 'Lucario', 'ROB', 'Toon Link', 'Wolf', 'Villager', 'Mega Man', 'Wii Fit Trainer',
   'Rosalina & Luma', 'Little Mac', 'Greninja', 'Palutena', 'Pac-Man', 'Robin', 'Shulk', 'Bowser Jr', 'Duck Hunt', 'Ryu', 'Ken', 'Cloud', 'Corrin',
   'Bayonetta', 'Inkling', 'Ridley', 'Simon & Richter', 'King K Rool', 'Isabelle', 'Incineroar', 'Piranha Plant', 'Joker', 'Hero', 'Banjo & Kazooie',
-  'Terry', 'Byleth', 'Min Min', 'Steve', 'Sephiroth', 'Pyra & Mythra', 'Kazuya', 'Sora'
+  'Terry', 'Byleth', 'Min Min', 'Steve', 'Sephiroth', 'Pyra & Mythra', 'Kazuya', 'Sora', "Mii Brawler", "Mii Swordfighter", "Mii Gunner"
 ];
-const skills = ['Movement', "Edge Guarding", "Recovery", "Combos", "Defense"]
+export const skills = ['Movement', "Edge Guarding", "Recovery", "Combos", "Defense"]
+
 
 export default function Component() {
   const [char1, setChar1] = useState("loading...")
@@ -29,6 +33,13 @@ export default function Component() {
     setChar1(getRandomCharacter());
     setChar2(getRandomCharacter());
   }, []);
+
+  useEffect(() => {
+    if (char1 === char2) {
+      setChar2(getRandomCharacter());
+    }
+
+  }, [char1]);
 
   function getRandomCharacter() {
     return characters[Math.floor(Math.random() * characters.length)]
@@ -62,9 +73,10 @@ export default function Component() {
             const rankings: Record<string, number> = {};
             charactersWithRatios.forEach((character, index) => {
               rankings[`${character.name}Rank`] = index + 1; // Ranking starts at 1
+              rankings[`${character.name}Winrate`] = parseFloat(character.winrate.toFixed(5));
             });
 
-            // Save the rankings.tsx under each skill with the "Rankings" sub-collection
+            // Save the page.tsx under each skill with the "Rankings" sub-collection
             const rankingsDocRef = doc(db, "skills", skill, "Rankings", skill);
             await setDoc(rankingsDocRef, rankings);
           }
@@ -72,7 +84,7 @@ export default function Component() {
       }
       console.log("Rankings updated successfully!");
     } catch (error) {
-      console.error("Error updating rankings.tsx: ", error);
+      console.error("Error updating page.tsx: ", error);
     }
   }
 
@@ -92,7 +104,6 @@ export default function Component() {
 
   async function addToFirestore(skill: string, winner: string, loser: string) {
     const skillDocRef = doc(db, "skills", skill);
-    console.log(skillDocRef)
 
     try {
       // Get the current document for the skill
@@ -122,8 +133,8 @@ export default function Component() {
             await updateDoc(skillDocRef, {
               [winnerAttributeName]: winnerWins + 1,
               [loserAttributeName]: loserLosses + 1,
-              [`${winner}Winrate`]: parseFloat(winnerWinrate.toFixed(2)),
-              [`${loser}Winrate`]: parseFloat(loserWinrate.toFixed(2)),
+              [`${winner}Winrate`]: parseFloat(winnerWinrate.toFixed(5)),
+              [`${loser}Winrate`]: parseFloat(loserWinrate.toFixed(5)),
             } as never);
           }
         }
@@ -163,6 +174,7 @@ export default function Component() {
 
   }
 
+
   function Results(): JSX.Element {
     const [rankingData, setRankingData] = useState<{ skill: string, data: Record<string, number> }[]>([]);
 
@@ -190,45 +202,55 @@ export default function Component() {
     }, [currentSkill]);
     return (
       <div
-        className="flex flex-col items-center justify-center bg-white min-h-[600px] rounded-lg shadow-xl w-full sm:max-w-[90%] md:max-w-[50%] p-6">
-        <text className={'text-3xl text-black font-black '}>
-          Results
-        </text>
+        className="flex flex-col items-center justify-center bg-white min-h-[600px] rounded-lg shadow-xl w-full sm:max-w-[90%] md:max-w-[60%] p-6">
+        <div className={"flex flex-row justify-between w-[100%] items-center"}>
+          <img
+            src={CharacterPhotoUrls[char1] as keyof typeof CharacterPhotoUrls}
+            alt="avatar"
+            className="self-left h-32"/>
+
+          <img
+            src={CharacterPhotoUrls[char2] as keyof typeof CharacterPhotoUrls}
+            alt="avatar"
+            className="self-right h-32"/>
+        </div>
         {Object.entries(gameMemory).map(([skill, winner]) => {
           const winnerRank = rankingData.find((data) => data.skill === skill)?.data[`${winner}Rank`] ?? 0;
           const loserRank = rankingData.find((data) => data.skill === skill)?.data[`${winner === char1 ? char2 : char1}Rank`] ?? 0;
           const char1Rank = (winner === char1 ? winnerRank : loserRank);
           const char2Rank = (winner === char2 ? winnerRank : loserRank);
           const guessedSame = winnerRank < loserRank;
-          const bgColor = guessedSame ? 'bg-green-100' : 'bg-red-100';
-          const char2Color = winner === char2 ? 'text-green-500' : 'text-black';
-          const char1Color = winner === char1 ? 'text-green-500' : 'text-black';
+          const bgColor = guessedSame ? 'bg-green-50' : '';
+          const char2Color = winner === char2 ? 'text-blue-500' : 'text-black';
+          const char1Color = winner === char1 ? 'text-blue-500' : 'text-black';
 
 
           return (
-            <div key={skill} className={"w-[100%] flex flex-col items-center"}>
+            <div key={skill} className={"w-[100%] font-mono flex flex-col items-center"}>
               <div key={skill}
                    className="w-[100%] text-xl text-zinc-950 flex items-center flex-col  font-semibold text-center mb-6">
 
+
                 <div
-                  className="text-xl text-zinc-950 flex items-center flex-row justify-between font-semibold text-center mb-6">
-                  <text className="text-2xl text-black ">{skill}</text>
-                </div>
-                <div
-                  className={`${bgColor} flex w-[100%] justify-between`}>
+                  className={`${bgColor} rounded-md px-2 py-6 items-center flex w-[100%] justify-between`}>
                   <div>
 
-                    <text>
-                      {char1Rank}.
+                    <text className={`font-bold ${char1Color}`}>
+                      #{char1Rank}
                     </text>
-                    <text className={`text-2xl ${char1Color}`}>{char1}</text>
+                  </div>
+                  <div className={"flex flex-col items-center"}>
+                    <text className="text-2xl text-black">{skill}</text>
+                    {guessedSame ? (
+                      <text className="text-sm text-black">(with crowd)</text>
+                    ) : (
+                      <text className="text-sm text-black">(without crowd)</text>
+                    )}
                   </div>
 
-
                   <div>
-                    <text className={`text-2xl ${char2Color}`}>{char2}</text>
-                    <text>
-                      {char2Rank}.
+                    <text className={`font-bold ${char2Color}`}>
+                      #{char2Rank}
                     </text>
                   </div>
                 </div>
@@ -239,7 +261,7 @@ export default function Component() {
         })}
         <div className="flex justify-center">
           <button
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+            className="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-colors"
             onClick={newCharacters}
           >
             Play again (space)
@@ -252,50 +274,82 @@ export default function Component() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-purple-100 flex items-center justify-center p-4">
-      {currentSkill < skills.length ? (
+    <div className="min-h-screen bg-white p-4">
 
-        <div
-          className="flex flex-col items-center justify-center bg-white min-h-[600px] rounded-lg shadow-xl w-full sm:max-w-[90%] md:max-w-[50%] p-6">
-          <text className={'text-3xl text-black font-black '}>
-            Who&apos;s better at
-          </text>
-          <div className="w-[80%] sm:w-[100%]">
+      <Navbar/>
+      <div className={"flex-col flex items-center justify-center "}>
 
-            <div className="text-xl text-zinc-950 flex items-center flex-col font-semibold text-center mb-6">
+        {currentSkill < skills.length ? (
 
-              <text className="text-5xl text-blue-600">{skills[currentSkill]}</text>
-            </div>
+          <div className={"w-[60%]"}
+          >
 
-            <div className="w-[100%]  flex justify-between items-center mb-8">
-              <button
-                className={`w-40 h-40 text-lg text-blue-950 font-bold border-2 border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
-                onClick={() => handleChoice(char1)}
-              >
-                {char1}
-              </button>
-              <div className="text-2xl text-blue-950 font-bold">VS</div>
-              <button
-                className={`w-40 h-40 text-lg text-blue-950 font-bold border-2 border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
-                onClick={() => handleChoice(char2)}
-              >
-                {char2}
-              </button>
+            <div className={"flex-col  pt-10 pb-10 items-center justify-center"}>
+
+              <div className="w-[80%] sm:w-[100%]">
+
+                <div className="text-xl text-zinc-950 flex items-center flex-col font-semibold text-center mb-6">
+                  <text className={'text-xl font-mono text-black font-light '}>
+                    who&apos;s better at...
+                  </text>
+                  <text className="text-5xl font-mono text-blue-600">{skills[currentSkill]}</text>
+                </div>
+
+                <div className="w-[100%] pt-10 flex justify-between items-center mb-8">
+                  <div className={"flex"}>
+                    <button
+                      className={`min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
+                      onClick={() => handleChoice(char1)}
+                    >
+                      <div className={'flex font-mono flex-col items-center'}>
+                        {char1 !== "loading..." && (
+                          <img
+                            src={CharacterPhotoUrls[char1]}
+                            alt="avatar"
+                            className="h-64"
+                          />
+                        )}
+                        {char1}
+                      </div>
+                    </button>
+                  </div>
+                  <div className={"flex"}>
+
+                    <button
+                      className={`w-60  text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
+                      onClick={() => handleChoice(char2)}
+                    >
+                      <div className={'flex font-mono flex-col items-center'}>
+                        {char2 !== "loading..." && (
+                          <img
+                            src={CharacterPhotoUrls[char2]}
+                            alt="avatar"
+                            className="h-64"
+                          />
+                        )}
+                        {char2}
+                      </div>
+                    </button>
+
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-center mt-20">
+                <button
+                  className="px-12 py-1 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-colors"
+                  onClick={newCharacters}
+                >
+                  Skip
+                </button>
+              </div>
             </div>
           </div>
-
-          <div className="flex justify-center">
-            <button
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
-              onClick={newCharacters}
-            >
-              Skip
-            </button>
-          </div>
-        </div>
-      ) : (
-        <Results/>
-      )}
+        ) : (
+          <Results/>
+        )}
+      </div>
+      <Footer/>
     </div>
   )
 }
