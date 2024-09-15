@@ -27,8 +27,12 @@ export const Footer = () => {
 
 
         </a>
-        <p className="pt-2 text-center">by <a href={"https://youtube.com/@Spenkr"}
-                                              className={"text-blue-500"}>Spenkr</a>&apos;s lil bro &gt;:)</p>
+
+        <p className="pt-2 text-center">by <a href={"https://x.com/jintuschu"}
+                                              className={"text-blue-500"}>Jintus</a>&apos; and <a
+          href={"https://youtube.com/@Spenkr"}
+          className={"text-blue-500"}>Spenkr</a>&apos;s lil bro &gt;:)
+        </p>
       </div>
       {/*<div className={"self-end"}>*/}
       {/*  <p>2021</p>*/}

@@ -16,7 +16,7 @@ const characters = [
   'Bayonetta', 'Inkling', 'Ridley', 'Simon & Richter', 'King K Rool', 'Isabelle', 'Incineroar', 'Piranha Plant', 'Joker', 'Hero', 'Banjo & Kazooie',
   'Terry', 'Byleth', 'Min Min', 'Steve', 'Sephiroth', 'Pyra & Mythra', 'Kazuya', 'Sora', "Mii Brawler", "Mii Swordfighter", "Mii Gunner"
 ];
-export const skills = ['Movement', "Edge Guarding", "Recovery", "Combos", "Defense"]
+export const skills = ['Movement', "Edge Guarding", "Recovery", "Combos", "Defense", "Matchup"]
 
 
 export default function Component() {
@@ -202,7 +202,7 @@ export default function Component() {
     }, [currentSkill]);
     return (
       <div
-        className="flex flex-col items-center justify-center bg-white min-h-[600px] rounded-lg shadow-xl w-full sm:max-w-[90%] md:max-w-[60%] p-6">
+        className="mt-6 flex flex-col items-center justify-center bg-white min-h-[600px] rounded- w-full sm:max-w-[90%] md:max-w-[60%] p-6">
         <div className={"flex flex-row justify-between w-[100%] items-center"}>
           <img
             src={CharacterPhotoUrls[char1] as keyof typeof CharacterPhotoUrls}
@@ -228,17 +228,25 @@ export default function Component() {
           return (
             <div key={skill} className={"w-[100%] font-mono flex flex-col items-center"}>
               <div key={skill}
-                   className="w-[100%] text-xl text-zinc-950 flex items-center flex-col  font-semibold text-center mb-6">
+                   className="w-[100%] text-xl text-zinc-950 flex items-center flex-col  font-semibold text-center ">
 
 
                 <div
-                  className={`${bgColor} rounded-md px-2 py-6 items-center flex w-[100%] justify-between`}>
-                  <div>
+                  className={`${bgColor} rounded-md px-8 py-6 items-center flex w-[100%] justify-between`}>
+                  {skill === skills[skills.length - 1] ? (
+                    <div>
+                      <text className={`font-bold ${char1Color}`}>
+                        wip
+                      </text>
+                    </div>
+                  ) : (
+                    <div>
 
-                    <text className={`font-bold ${char1Color}`}>
-                      #{char1Rank}
-                    </text>
-                  </div>
+                      <text className={`font-bold ${char1Color}`}>
+                        #{char1Rank}
+                      </text>
+                    </div>
+                  )}
                   <div className={"flex flex-col items-center"}>
                     <text className="text-2xl text-black">{skill}</text>
                     {guessedSame ? (
@@ -248,13 +256,20 @@ export default function Component() {
                     )}
                   </div>
 
-                  <div>
-                    <text className={`font-bold ${char2Color}`}>
-                      #{char2Rank}
-                    </text>
-                  </div>
+                  {skill === skills[skills.length - 1] ? (
+                    <div>
+                      <text className={`font-bold ${char1Color}`}>
+                        wip
+                      </text>
+                    </div>
+                  ) : (
+                    <div>
+                      <text className={`font-bold ${char2Color}`}>
+                        #{char2Rank}
+                      </text>
+                    </div>
+                  )}
                 </div>
-
               </div>
             </div>
           )
@@ -289,8 +304,8 @@ export default function Component() {
               <div className="w-[80%] sm:w-[100%]">
 
                 <div className="text-xl text-zinc-950 flex items-center flex-col font-semibold text-center mb-6">
-                  <text className={'text-xl font-mono text-black font-light '}>
-                    who&apos;s better at...
+                  <text className={'text-xl font-mono text-black font-light'}>
+                    {currentSkill !== skills.length - 1 ? "who's better at..." : "who wins the"}
                   </text>
                   <text className="text-5xl font-mono text-blue-600">{skills[currentSkill]}</text>
                 </div>
