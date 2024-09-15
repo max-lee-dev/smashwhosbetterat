@@ -6,6 +6,7 @@ import {db} from "@/firebase";
 import {CharacterPhotoUrls} from "@/app/files/photos";
 import {useRouter} from "next/navigation";
 import Navbar from "@/app/components/Navbar";
+import Footer from "@/app/components/Footer";
 
 export default function Ranking() {
   const [skill, setSkill] = useState(0);
@@ -143,6 +144,7 @@ export default function Ranking() {
       >
         ^
       </button>
+      <Footer/>
     </div>
   );
 }

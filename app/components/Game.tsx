@@ -4,7 +4,7 @@ import {doc, getDoc, setDoc, updateDoc} from '@firebase/firestore';
 import {db} from '@/firebase';
 import {CharacterPhotoUrls} from "@/app/files/photos";
 import Navbar from "@/app/components/Navbar";
-import Footer from "@/app/rankings/Footer";
+import Footer from "@/app/components/Footer";
 
 // Mock data - replace with actual Smash Bros Ultimate characters and skills
 const characters = [
