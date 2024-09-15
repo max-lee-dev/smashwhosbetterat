@@ -22,6 +22,7 @@ export const skills = ['Movement', "Edge Guarding", "Recovery", "Combos", "Defen
 export default function Component() {
   const [char1, setChar1] = useState("loading...")
   const [char2, setChar2] = useState("loading...")
+  const [numGames, setNumGames] = useState(0)
   const [currentSkill, setCurrentSkill] = useState(0)
   const [gameMemory, setGameMemory] = useState<Record<string, string>>({})
 
@@ -164,10 +165,25 @@ export default function Component() {
       choice === char1 ? char1 : char2,
       choice === char1 ? char2 : char1
     );
+    setNumGames((prev) => prev + 1);
 
   }
 
   function newCharacters() {
+    setNumGames((prevNumGames) => {
+      const newNumGames = prevNumGames + 1;
+
+      fetch("https://discord.com/api/webhooks/1284975432529346721/lbicsDRwzKbyg1Ge70bkYIsN_oYazPKSokc2T9lGiKCaCCWsHEsOFeIsIW5Y-Ze2MVtt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: `New game started! This user has played ${newNumGames} games this session.`,
+        }),
+      });
+      return newNumGames;
+    });
     setChar1(getRandomCharacter())
     setChar2(getRandomCharacter())
     setCurrentSkill(0)
