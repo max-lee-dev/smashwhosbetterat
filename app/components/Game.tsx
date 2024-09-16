@@ -165,7 +165,6 @@ export default function Component() {
       choice === char1 ? char1 : char2,
       choice === char1 ? char2 : char1
     );
-    setNumGames((prev) => prev + 1);
 
   }
 
@@ -184,6 +183,7 @@ export default function Component() {
       });
       return newNumGames;
     });
+    setNumGames((prev) => prev + 1);
     console.log(`New game started! ${numGames} games played.`);
     setChar1(getRandomCharacter())
     setChar2(getRandomCharacter())
