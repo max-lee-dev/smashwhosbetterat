@@ -183,7 +183,6 @@ export default function Component() {
       });
       return newNumGames;
     });
-    setNumGames((prev) => prev + 1);
     console.log(`New game started! ${numGames} games played.`);
     setChar1(getRandomCharacter())
     setChar2(getRandomCharacter())
