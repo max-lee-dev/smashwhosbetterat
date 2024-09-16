@@ -3,7 +3,7 @@ import {connectFirestoreEmulator, getFirestore} from "@firebase/firestore";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDXlE4jNzAxnNuOzQz0gVk6wPFgJ0xph8k",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: "smashwhosbetterat.firebaseapp.com",
   projectId: "smashwhosbetterat",
   storageBucket: "smashwhosbetterat.appspot.com",
