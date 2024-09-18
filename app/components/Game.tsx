@@ -1,13 +1,15 @@
 "use client";
 import {useEffect, useState} from 'react'
-import {doc, getDoc, setDoc, updateDoc} from '@firebase/firestore';
+import {doc, DocumentData, getDoc, setDoc, updateDoc} from '@firebase/firestore';
 import {db} from '@/firebase';
 import {CharacterPhotoUrls} from "@/app/files/photos";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
+import {findWinrate, getVSString, getWinrateDocument} from "@/app/utils/utils";
+import {Center, Collapse} from "@chakra-ui/react";
 
 // Mock data - replace with actual Smash Bros Ultimate characters and skills
-const characters = [
+export const characters = [
   'Mario', 'Donkey Kong', 'Link', 'Samus & Dark Samus', 'Yoshi', 'Kirby', 'Fox', 'Pikachu', 'Luigi', 'Ness', 'Captain Falcon', 'Jigglypuff',
   'Peach & Daisy', 'Bowser', 'Ice Climbers', 'Sheik', 'Zelda', 'Dr Mario', 'Pichu', 'Falco', 'Marth', 'Lucina', 'Young Link', 'Ganondorf',
   'Mewtwo', 'Roy', 'Chrom', 'Mr Game & Watch', 'Meta Knight', 'Pit & Dark Pit', 'Zero Suit Samus', 'Wario', 'Snake', 'Ike', 'Pokemon Trainer',
@@ -25,11 +27,39 @@ export default function Component() {
   const [numGames, setNumGames] = useState(0)
   const [currentSkill, setCurrentSkill] = useState(0)
   const [gameMemory, setGameMemory] = useState<Record<string, string>>({})
+  const [movementWinrates, setMovementWinrates] = useState<DocumentData | null>(null);
+  const [EdgeGuardingWinrates, setEdgeGuardingWinrates] = useState<DocumentData | null>(null);
+  const [RecoveryWinrates, setRecoveryWinrates] = useState<DocumentData | null>(null);
+  const [CombosWinrates, setCombosWinrates] = useState<DocumentData | null>(null);
+  const [DefenseWinrates, setDefenseWinrates] = useState<DocumentData | null>(null);
+  const [MatchupWinrates, setMatchupWinrates] = useState<DocumentData | null>(null);
 
 
   useEffect(() => {
-    console.log(db);
-    updateRanking();
+    getWinrateDocument("Movement").then((data) => {
+      if (!data) return;
+      setMovementWinrates(data);
+    })
+    getWinrateDocument("Edge Guarding").then((data) => {
+      if (!data) return;
+      setEdgeGuardingWinrates(data);
+    })
+    getWinrateDocument("Recovery").then((data) => {
+      if (!data) return;
+      setRecoveryWinrates(data);
+    })
+    getWinrateDocument("Combos").then((data) => {
+      if (!data) return;
+      setCombosWinrates(data);
+    })
+    getWinrateDocument("Defense").then((data) => {
+      if (!data) return;
+      setDefenseWinrates(data);
+    })
+    getWinrateDocument("Matchup").then((data) => {
+      if (!data) return;
+      setMatchupWinrates(data);
+    })
 
     setChar1(getRandomCharacter());
     setChar2(getRandomCharacter());
@@ -46,48 +76,6 @@ export default function Component() {
     return characters[Math.floor(Math.random() * characters.length)]
   }
 
-  async function updateRanking() {
-    try {
-      // Loop through all skills
-      for (const skill of skills) {
-        const skillRef = doc(db, "skills", skill);
-        const skillDoc = await getDoc(skillRef);
-
-        if (skillDoc.exists()) {
-          const data = skillDoc.data();
-          if (data) {
-            const charactersWithRatios: { name: string, winrate: number }[] = [];
-
-            // Collect win ratios for each character within the specific skill
-            for (const character of characters) {
-              const wins = data[`${character}Wins`] || 0;
-              const losses = data[`${character}Losses`] || 0;
-              const winrate = wins + losses > 0 ? wins / (wins + losses) : 0;
-
-              charactersWithRatios.push({name: character, winrate});
-            }
-
-            // Sort the characters by win ratio (descending order)
-            charactersWithRatios.sort((a, b) => b.winrate - a.winrate);
-
-            // Prepare a ranking object to store the winner and loser within the skill context
-            const rankings: Record<string, number> = {};
-            charactersWithRatios.forEach((character, index) => {
-              rankings[`${character.name}Rank`] = index + 1; // Ranking starts at 1
-              rankings[`${character.name}Winrate`] = parseFloat(character.winrate.toFixed(5));
-            });
-
-            // Save the page.tsx under each skill with the "Rankings" sub-collection
-            const rankingsDocRef = doc(db, "skills", skill, "Rankings", skill);
-            await setDoc(rankingsDocRef, rankings);
-          }
-        }
-      }
-      console.log("Rankings updated successfully!");
-    } catch (error) {
-      console.error("Error updating page.tsx: ", error);
-    }
-  }
 
   // add a keyboard event listener for the spacebar, to skip the current game
   useEffect(() => {
@@ -104,6 +92,7 @@ export default function Component() {
 
 
   async function addToFirestore(skill: string, winner: string, loser: string) {
+    if (!db) return;
     const skillDocRef = doc(db, "skills", skill);
 
     try {
@@ -151,6 +140,39 @@ export default function Component() {
     } catch (error) {
       console.error("Error updating Firestore: ", error);
     }
+
+    // Match Up winrate
+    const charactersString = getVSString(winner, loser);
+    const rankingsDocRef = doc(db, "skills", skill, "Matchups", "Winrates");
+    const rankingsDoc = await getDoc(rankingsDocRef);
+    if (rankingsDoc.exists() && rankingsDoc.data()) {
+      const currentData = rankingsDoc.data();
+      // set doc so we just keep on adding more stuffies!.
+      if (currentData) {
+        const winnerWins = currentData[`${charactersString}-${winner}`] || 0;
+        const loserWins = currentData[`${charactersString}-${loser}`] || 0;
+        const totalGames = currentData[`${charactersString}-totalGames`] || 0;
+        const winnerWinrate = totalGames === 0 ? 1.0 : parseFloat(String((winnerWins + 1) / (totalGames + 1))).toFixed(5);
+        const loserWinrate = totalGames === 0 ? 0.0 : parseFloat(String((totalGames - winnerWins) / (totalGames + 1))).toFixed(5);
+        await updateDoc(rankingsDocRef, {
+          [`${charactersString}-${winner}`]: winnerWins + 1,
+          [`${charactersString}-${loser}`]: loserWins,
+          [`${charactersString}-totalGames`]: totalGames + 1,
+          [`${charactersString}-${winner}Winrate`]: winnerWinrate,
+          [`${charactersString}-${loser}Winrate`]: loserWinrate,
+
+        } as never);
+      }
+    } else {
+      // If the document doesn't exist, create it with initial win/loss values
+      await setDoc(rankingsDocRef, {
+        [`${charactersString}-${winner}`]: 1,
+        [`${charactersString}-${loser}`]: 0,
+        [`${charactersString}-totalGames`]: 1,
+        [`${charactersString}-${winner}Winrate`]: 1.0,
+        [`${charactersString}-${loser}Winrate`]: 0.0,
+      });
+    }
   }
 
 
@@ -192,99 +214,93 @@ export default function Component() {
 
 
   function Results(): JSX.Element {
-    const [rankingData, setRankingData] = useState<{ skill: string, data: Record<string, number> }[]>([]);
 
-    useEffect(() => {
-      const fetchRankingData = async () => {
-        const skillCollectionRefs = skills.map(skill => doc(db, "skills", skill, "Rankings", skill));
-
-        // Use Promise.all to wait for all getDoc calls
-        const rankingDataPromises = skillCollectionRefs.map(async (skillRef) => {
-          const skillDoc = await getDoc(skillRef);
-          if (skillDoc.exists() && skillDoc.data()) {
-            const data = skillDoc.data();
-            return {skill: skillRef.id, data};
-          }
-          return null; // Handle the case where the document does not exist
-        });
-        const rankingData = await Promise.all(rankingDataPromises);
-        // Filter out any null values (in case a document didn't exist)
-        const validRankingData = rankingData.filter(data => data !== null);
-        setRankingData(validRankingData);
-
-      };
-
-      fetchRankingData();
-    }, [currentSkill]);
     return (
+
       <div
-        className="mt-6 flex flex-col items-center justify-center bg-white min-h-[600px] rounded- w-full sm:max-w-[90%] md:max-w-[60%] p-6">
-        <div className={"flex flex-row justify-between w-[100%] items-center"}>
+        className="mt-6 flex flex-col items-center justify-center bg-white min-h-[600px] rounded- w-full sm:max-w-[90%] md:max-w-[80%] p-2">
+        <div className={"px-[6%]  flex flex-row justify-between w-[100%] items-center"}>
+
           <img
             src={CharacterPhotoUrls[char1] as keyof typeof CharacterPhotoUrls}
             alt="avatar"
-            className="self-left h-32"/>
+            className="self-left w-28"/>
+
+          <text className={"text-5xl font-mono text-blue-500 font-bold"}>Results</text>
 
           <img
             src={CharacterPhotoUrls[char2] as keyof typeof CharacterPhotoUrls}
             alt="avatar"
-            className="self-right h-32"/>
+            className="self-right w-28"/>
         </div>
         {Object.entries(gameMemory).map(([skill, winner]) => {
-          const winnerRank = rankingData.find((data) => data.skill === skill)?.data[`${winner}Rank`] ?? 0;
-          const loserRank = rankingData.find((data) => data.skill === skill)?.data[`${winner === char1 ? char2 : char1}Rank`] ?? 0;
-          const char1Rank = (winner === char1 ? winnerRank : loserRank);
-          const char2Rank = (winner === char2 ? winnerRank : loserRank);
-          const guessedSame = winnerRank < loserRank;
-          const bgColor = guessedSame ? 'bg-green-50' : '';
-          const char2Color = winner === char2 ? 'text-blue-500' : 'text-black';
-          const char1Color = winner === char1 ? 'text-blue-500' : 'text-black';
+          let WinrateDocument = movementWinrates;
+          if (skill === "Movement") {
+            WinrateDocument = movementWinrates;
+          } else if (skill === "Edge Guarding") {
+            WinrateDocument = EdgeGuardingWinrates;
+          } else if (skill === "Recovery") {
+            WinrateDocument = RecoveryWinrates;
+          } else if (skill === "Combos") {
+            WinrateDocument = CombosWinrates;
+          } else if (skill === "Defense") {
+            WinrateDocument = DefenseWinrates;
+          } else if (skill === "Matchup") {
+            WinrateDocument = MatchupWinrates;
+          }
+          const chosenCharacterWinrate = WinrateDocument ? findWinrate(
+            WinrateDocument,
+            winner,
+            winner === char1 ? char2 : char1
+          ) * 100 : 100;
+          // const notChosenCharacterWinrate = 100 - chosenCharacterWinrate;
+          const badge = chosenCharacterWinrate >= 50 ? "bg-blue-500" : "bg-red-500";
 
 
           return (
-            <div key={skill} className={"w-[100%] font-mono flex flex-col items-center"}>
+            <div key={skill} className={"w-[100%]  min-h-[10%] font-mono flex flex-col items-center"}>
+
               <div key={skill}
-                   className="w-[100%] text-xl text-zinc-950 flex items-center flex-col  font-semibold text-center ">
+                   className="w-[100%] h-[100%] text-xl text-zinc-950 flex items-center flex-col  font-semibold text-center ">
 
 
                 <div
-                  className={`${bgColor} rounded-md px-8 py-6 items-center flex w-[100%] justify-between`}>
-                  {skill === skills[skills.length - 1] ? (
-                    <div>
-                      <text className={`font-bold ${char1Color}`}>
-                        wip
-                      </text>
-                    </div>
-                  ) : (
-                    <div>
+                  className={`rounded-md h-[100%] my-2 items-center flex flex-row w-[90%] justify-between`}>
 
-                      <text className={`font-bold ${char1Color}`}>
-                        #{char1Rank}
-                      </text>
-                    </div>
-                  )}
-                  <div className={"flex flex-col items-center"}>
-                    <text className="text-2xl text-black">{skill}</text>
-                    {guessedSame ? (
-                      <text className="text-sm text-black">(with crowd)</text>
-                    ) : (
-                      <text className="text-sm text-black">(without crowd)</text>
-                    )}
+                  <div
+                    className={'w-[40%] rounded-2xl min-h-[40px] flex justify-between text-center items-center'}>
+                    <text className={`font-bold text-center`}>
+                      {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
+                      {winner === char1 && (
+                        <div>
+                          <span
+                            className={`${badge} min-h-[50px] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                            {chosenCharacterWinrate.toFixed(1)}% agreed
+                          </span>
+                        </div>
+                      )}
+
+                    </text>
+
+                  </div>
+                  <div className={"w-[100%]"}>
+                    <text className="text-xl text-black">{skill}</text>
                   </div>
 
-                  {skill === skills[skills.length - 1] ? (
-                    <div>
-                      <text className={`font-bold ${char1Color}`}>
-                        wip
-                      </text>
-                    </div>
-                  ) : (
-                    <div>
-                      <text className={`font-bold ${char2Color}`}>
-                        #{char2Rank}
-                      </text>
-                    </div>
-                  )}
+                  <div className={'w-[40%] rounded-2xl flex flex-row justify-end text-right'}>
+                    <text className={`font-bold flex text-right self-end flex-end`}>
+                      {/*/!*{skill !== "Matchup" && `Rank #${char2Rank}`}*!/*/}
+                      {winner === char2 && (
+                        <div className={"flex-end"}>
+                            <span
+                              className={`${badge} text-white min-h-[50px] text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                              {chosenCharacterWinrate.toFixed(1)}% agreed
+                            </span>
+                        </div>
+                      )}
+
+                    </text>
+                  </div>
                 </div>
               </div>
             </div>
@@ -299,7 +315,6 @@ export default function Component() {
           </button>
         </div>
 
-
       </div>
     )
   }
@@ -308,82 +323,86 @@ export default function Component() {
     <div className="min-h-screen bg-white p-4">
 
       <Navbar/>
-      <div className={"flex-col flex items-center justify-center "}>
+      <Center className={"flex flex-col items-center"}>
+        <Collapse in={currentSkill < skills.length}
+                  className={'justify-self-center flex-col flex items-center justify-center self-center w-[100%]'}>
+          <Center>
+            <div className={"w-[60%] self-center "}>
 
-        {currentSkill < skills.length ? (
+              <div className={"flex-col  pt-10 pb-10 items-center justify-center"}>
 
-          <div className={"w-[60%]"}
-          >
+                <div className="w-[80%] sm:w-[100%]">
 
-            <div className={"flex-col  pt-10 pb-10 items-center justify-center"}>
+                  <div className="text-xl text-zinc-950 flex items-center flex-col font-semibold text-center mb-6">
+                    <text className={'text-xl font-mono text-black font-light'}>
+                      {currentSkill !== skills.length - 1 ? "who's better at..." : "who wins the"}
+                    </text>
+                    <text className="text-5xl font-mono text-blue-600">{skills[currentSkill]}</text>
+                  </div>
 
-              <div className="w-[80%] sm:w-[100%]">
+                  <div className="w-[100%] pt-10 flex justify-between items-center mb-8">
+                    <div className={"flex"}>
+                      <button
+                        className={`min-w-60  text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
+                        onClick={() => handleChoice(char1)}
+                      >
+                        <div className={'flex font-mono flex-col items-center'}>
+                          {char1 !== "loading..." && (
+                            <img
+                              src={CharacterPhotoUrls[char1]}
+                              alt="avatar"
+                              className="h-64 p-2"
+                            />
+                          )}
+                          <text className={"pb-2"}>
+                            {char1}
+                          </text>
+                        </div>
+                      </button>
+                    </div>
+                    <div className={"flex"}>
 
-                <div className="text-xl text-zinc-950 flex items-center flex-col font-semibold text-center mb-6">
-                  <text className={'text-xl font-mono text-black font-light'}>
-                    {currentSkill !== skills.length - 1 ? "who's better at..." : "who wins the"}
-                  </text>
-                  <text className="text-5xl font-mono text-blue-600">{skills[currentSkill]}</text>
+                      <button
+                        className={`min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
+                        onClick={() => handleChoice(char2)}
+                      >
+                        <div className={'flex font-mono flex-col items-center'}>
+                          {char2 !== "loading..." && (
+                            <img
+                              src={CharacterPhotoUrls[char2]}
+                              alt="avatar"
+                              className="h-64 p-2"
+                            />
+                          )}
+                          <text className={"pb-2"}>
+                            {char2}
+                          </text>
+                        </div>
+                      </button>
+
+                    </div>
+                  </div>
                 </div>
 
-                <div className="w-[100%] pt-10 flex justify-between items-center mb-8">
-                  <div className={"flex"}>
-                    <button
-                      className={`min-w-60  text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
-                      onClick={() => handleChoice(char1)}
-                    >
-                      <div className={'flex font-mono flex-col items-center'}>
-                        {char1 !== "loading..." && (
-                          <img
-                            src={CharacterPhotoUrls[char1]}
-                            alt="avatar"
-                            className="h-80 p-10"
-                          />
-                        )}
-                        <text className={"pb-2"}>
-                          {char1}
-                        </text>
-                      </div>
-                    </button>
-                  </div>
-                  <div className={"flex"}>
-
-                    <button
-                      className={`min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
-                      onClick={() => handleChoice(char2)}
-                    >
-                      <div className={'flex font-mono flex-col items-center'}>
-                        {char2 !== "loading..." && (
-                          <img
-                            src={CharacterPhotoUrls[char2]}
-                            alt="avatar"
-                            className="h-80 p-10"
-                          />
-                        )}
-                        <text className={"pb-2"}>
-                          {char2}
-                        </text>
-                      </div>
-                    </button>
-
-                  </div>
+                <div className="flex justify-center mt-4">
+                  <button
+                    className="px-12 py-1 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-colors"
+                    onClick={newCharacters}
+                  >
+                    Skip
+                  </button>
                 </div>
-              </div>
-
-              <div className="flex justify-center mt-4">
-                <button
-                  className="px-12 py-1 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-colors"
-                  onClick={newCharacters}
-                >
-                  Skip
-                </button>
               </div>
             </div>
-          </div>
-        ) : (
-          <Results/>
-        )}
-      </div>
+          </Center>
+        </Collapse>
+
+        <Collapse className={"self-center w-[100%]"} in={currentSkill === skills.length}>
+          <Center className={"w-[100%]"}>
+            <Results/>
+          </Center>
+        </Collapse>
+      </Center>
       <Footer/>
     </div>
   )

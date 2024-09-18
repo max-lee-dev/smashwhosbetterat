@@ -1,23 +1,8 @@
-import React, {useEffect} from "react";
+import React from "react";
 import {GrGithub} from "react-icons/gr";
-import {doc, getDoc} from "@firebase/firestore";
-import {db} from "@/firebase";
 
 export const Footer = () => {
-  useEffect(() => {
-    // get total games played
-    const fetchTotalGamesPlayed = async () => {
-      const docRef = doc(db, "stats", "stats");
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        console.log("Total games played: ", docSnap.data());
-      } else {
-        console.log("No such document!");
-      }
-    };
-    fetchTotalGamesPlayed();
 
-  }, []);
   return (
     <div
       className={"flex-col text-sm text-gray-400 font-mono px-4 mt-2 self-end flex justify-center items-center w-full"}>

@@ -1,7 +1,7 @@
 "use client";
 import {useEffect, useState} from "react";
-import {skills} from "@/app/components/Game";
-import {doc, getDoc} from "@firebase/firestore";
+import {characters, skills} from "@/app/components/Game";
+import {doc, getDoc, setDoc} from "@firebase/firestore";
 import {db} from "@/firebase";
 import {CharacterPhotoUrls} from "@/app/files/photos";
 import {useRouter} from "next/navigation";
@@ -13,6 +13,53 @@ export default function Ranking() {
   const [data, setData] = useState<{ skill: string, data: Record<string, { rank: number, winrate: number }> }[]>();
   const [sortedRanking, setSortedRanking] = useState<{ name: string, rank: number, winrate: number }[]>();
   const router = useRouter();
+
+  async function updateRanking() {
+    try {
+      // Loop through all skills
+      for (const skill of skills) {
+        const skillRef = doc(db, "skills", skill);
+        const skillDoc = await getDoc(skillRef);
+
+        if (skillDoc.exists()) {
+          const data = skillDoc.data();
+          if (data) {
+            const charactersWithRatios: { name: string, winrate: number }[] = [];
+
+            // Collect win ratios for each character within the specific skill
+            for (const character of characters) {
+              const wins = data[`${character}Wins`] || 0;
+              const losses = data[`${character}Losses`] || 0;
+              const winrate = wins + losses > 0 ? wins / (wins + losses) : 0;
+
+              charactersWithRatios.push({name: character, winrate});
+            }
+
+            // Sort the characters by win ratio (descending order)
+            charactersWithRatios.sort((a, b) => b.winrate - a.winrate);
+
+            // Prepare a ranking object to store the winner and loser within the skill context
+            const rankings: Record<string, number> = {};
+            charactersWithRatios.forEach((character, index) => {
+              rankings[`${character.name}Rank`] = index + 1; // Ranking starts at 1
+              rankings[`${character.name}Winrate`] = parseFloat(character.winrate.toFixed(5));
+            });
+
+            // Save the page.tsx under each skill with the "Rankings" sub-collection
+            const rankingsDocRef = doc(db, "skills", skill, "Rankings", skill);
+            await setDoc(rankingsDocRef, rankings);
+          }
+        }
+      }
+      console.log("Rankings updated successfully!");
+    } catch (error) {
+      console.error("Error updating page.tsx: ", error);
+    }
+  }
+
+  useEffect(() => {
+    updateRanking();
+  }, []);
 
   useEffect(() => {
     const fetchRankingData = async () => {
