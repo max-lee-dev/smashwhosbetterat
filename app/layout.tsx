@@ -16,7 +16,7 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   title: "WhosBetterAt - who's better at what in smash?",
-  description: "a website to debate which smash characters are better at what!",
+  description: "decide which smash characters are better at what!",
 };
 
 export default function RootLayout({
