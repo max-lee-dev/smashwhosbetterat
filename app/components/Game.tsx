@@ -211,14 +211,18 @@ export default function Component() {
   function newCharacters() {
     setNumGames((prevNumGames) => {
       const newNumGames = prevNumGames + 1;
+      const curTotalGames = Number(localStorage.getItem("numGames")) || 0;
+      localStorage.setItem("numGames", String(newNumGames + curTotalGames));
 
+        
+      const thisDate = new Date();
       fetch("https://discord.com/api/webhooks/1284975432529346721/lbicsDRwzKbyg1Ge70bkYIsN_oYazPKSokc2T9lGiKCaCCWsHEsOFeIsIW5Y-Ze2MVtt", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: `New game started! This user has played ${newNumGames} games this session.`,
+          content: `${thisDate}\nNew game started! This user has played ${curTotalGames} games this session.`,
         }),
       });
       return newNumGames;
