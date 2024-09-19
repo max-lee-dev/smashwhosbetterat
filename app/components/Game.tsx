@@ -345,19 +345,17 @@ export default function Component() {
 
                   <div
                     className={'w-[40%] rounded-2xl min-h-[40px] flex justify-between text-center items-center'}>
-                    <text className={`font-bold text-center`}>
-                      {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
-                      {(winner === char1 || skill === "Matchup") && (
-                        <div
-                          className={`${char1Badge} w-[70%]  md:min-h-[50px] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                    {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
+                    {(winner === char1 || skill === "Matchup") && (
+                      <div
+                        className={`${char1Badge} font-bold text-center w-[70%] mr-auto md:min-h-[50px] md:w-[50%] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
                           <span
                             className={``}>
                               {skill === "Matchup" ? `${char1WinrateString}% picked ${char1}` : `${char1WinrateString}% agreed`}
                           </span>
-                        </div>
-                      )}
+                      </div>
+                    )}
 
-                    </text>
 
                   </div>
                   <div className={"w-fit flex flex-col"}>
@@ -375,7 +373,7 @@ export default function Component() {
                     {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
                     {(winner === char2 || skill === "Matchup") && (
                       <div
-                        className={`${char2Badge} ml-auto font-bold text-center w-[70%] self-end justify-end md:w-[100%] md:min-h-[50px] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                        className={`${char2Badge} ml-auto font-bold text-center w-[70%] self-end justify-end md:w-[50%] md:min-h-[50px] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
                           <span
                             className={``}>
                               {skill === "Matchup" ? `${char2WinrateString}% picked ${char2}` : `${char2WinrateString}% agreed`}
