@@ -247,14 +247,14 @@ export default function Component() {
             <img
               src={CharacterPhotoUrls[char1] as keyof typeof CharacterPhotoUrls}
               alt="avatar"
-              className="self-left w-28"/>
+              className="self-left w-16 md:w-28"/>
 
-            <text className={"text-5xl font-mono text-blue-500 font-bold"}>Results</text>
+            <text className={"text-2xl md:text-5xl font-mono text-blue-500 font-bold"}>Results</text>
 
             <img
               src={CharacterPhotoUrls[char2] as keyof typeof CharacterPhotoUrls}
               alt="avatar"
-              className="self-right w-28"/>
+              className="self-right w-16 md:w-28"/>
           </div>
         )}
         {Object.entries(gameMemory).map(([skill, winner]) => {
@@ -341,16 +341,17 @@ export default function Component() {
 
 
                 <div
-                  className={`rounded-md h-[100%] my-2 items-center flex flex-row w-[90%] justify-between`}>
+                  className={`rounded-md h-[100%] my-2 items-center flex flex-row w-[100%] justify-between`}>
 
                   <div
                     className={'w-[40%] rounded-2xl min-h-[40px] flex justify-between text-center items-center'}>
                     <text className={`font-bold text-center`}>
                       {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
                       {(winner === char1 || skill === "Matchup") && (
-                        <div>
+                        <div
+                          className={`${char1Badge} w-[70%]  md:min-h-[50px] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
                           <span
-                            className={`${char1Badge} min-h-[50px] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                            className={``}>
                               {skill === "Matchup" ? `${char1WinrateString}% picked ${char1}` : `${char1WinrateString}% agreed`}
                           </span>
                         </div>
@@ -369,20 +370,18 @@ export default function Component() {
                     )}
                   </div>
 
-                  <div className={'w-[40%] rounded-2xl flex flex-row justify-end text-right'}>
-                    <text className={`font-bold flex text-right self-end flex-end`}>
-                      {/*/!*{skill !== "Matchup" && `Rank #${char2Rank}`}*!/*/}
-                      {(winner === char2 || skill === "Matchup") && (
-                        <div className={"flex-end"}>
-                              <span
-                                className={`${char2Badge} text-white min-h-[50px] text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                  <div
+                    className={'w-[40%]  rounded-2xl min-h-[40px] flex flex-row'}>
+                    {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
+                    {(winner === char2 || skill === "Matchup") && (
+                      <div
+                        className={`${char2Badge} ml-auto font-bold text-center w-[70%] self-end justify-end md:w-[100%] md:min-h-[50px] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                          <span
+                            className={``}>
                               {skill === "Matchup" ? `${char2WinrateString}% picked ${char2}` : `${char2WinrateString}% agreed`}
-                            </span>
-                        </div>
-                      )}
-
-
-                    </text>
+                          </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -410,11 +409,11 @@ export default function Component() {
         <Collapse in={currentSkill < skills.length}
                   className={'justify-self-center flex-col flex items-center justify-center self-center w-[100%]'}>
           <Center>
-            <div className={"w-[60%] self-center "}>
+            <div className={"w-[100%]  sm:w-[60%] self-center "}>
 
               <div className={"flex-col  pt-10 pb-10 items-center justify-center"}>
 
-                <div className="w-[80%] sm:w-[100%]">
+                <div className="w-[100%] sm:w-[100%]">
 
                   <div
                     className="text-xl h-32 text-zinc-950 flex items-center flex-col font-semibold text-center pb-6">
@@ -426,9 +425,9 @@ export default function Component() {
                   </div>
 
                   <div className="w-[100%] pt-10 flex justify-between items-center mb-8">
-                    <div className={"flex min-w-[40%]"}>
+                    <div className={"flex min-w-[25%] md:min-w-[40%]"}>
                       <button
-                        className={`self-start min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
+                        className={`self-start min-w-[35%] md:min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
                         onClick={() => handleChoice(char1)}
                       >
                         <div className={'flex font-mono flex-col items-center'}>
@@ -436,20 +435,21 @@ export default function Component() {
                             <img
                               src={CharacterPhotoUrls[char1]}
                               alt="avatar"
-                              className="h-64 p-2"
+                              className="h-36 md:h-64 p-2"
                             />
                           )}
-                          <text className={"pb-2"}>
+                          <text className={"text-sm md:text-md pb-2"}>
                             {char1}
                           </text>
                         </div>
                       </button>
                     </div>
+
                     <div>
                       {currentSkill === skills.length - 1 && (
-                        <div className="flex min-w-[60%] justify-center mt-2">
+                        <div className="hidden md:flex min-w-[25%] md:min-w-[60%] justify-center mt-2">
                           <button
-                            className="px-8 py-4 border-2 border-blue-500 text-blue-600 font-mono text-md font-bold rounded hover:bg-gray-100 transition-colors"
+                            className="px-2 md:px-8 py-2 md:py-4 border-2 border-blue-500 text-blue-600 font-mono text-sm md:text-md font-bold rounded hover:bg-gray-100 transition-colors"
                             onClick={() => handleChoice("Even")}
                           >
                             Even
@@ -457,10 +457,10 @@ export default function Component() {
                         </div>
                       )}
                     </div>
-                    <div className={"flex justify-end min-w-[40%]"}>
+                    <div className={"flex justify-end  min-w-[25%] md:min-w-[40%]"}>
 
                       <button
-                        className={`min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
+                        className={`min-w-[35%] md:min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
                         onClick={() => handleChoice(char2)}
                       >
                         <div className={'flex font-mono flex-col items-center'}>
@@ -468,16 +468,28 @@ export default function Component() {
                             <img
                               src={CharacterPhotoUrls[char2]}
                               alt="avatar"
-                              className="h-64 p-2"
+                              className="h-36 md:h-64  p-2"
                             />
                           )}
-                          <text className={"pb-2"}>
+                          <text className={"text-sm md:text-md pb-2"}>
                             {char2}
                           </text>
                         </div>
                       </button>
                     </div>
                   </div>
+                </div>
+                <div>
+                  {currentSkill === skills.length - 1 && (
+                    <div className="flex md:hidden min-w-[25%] md:min-w-[60%] justify-center mt-2">
+                      <button
+                        className="px-8 py-4 border-2 border-blue-500 text-blue-600 font-mono text-md font-bold rounded hover:bg-gray-100 transition-colors"
+                        onClick={() => handleChoice("Even")}
+                      >
+                        Even
+                      </button>
+                    </div>
+                  )}
                 </div>
 
 
