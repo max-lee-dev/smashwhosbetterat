@@ -61,13 +61,13 @@ export default function Component() {
       setMatchupWinrates(data);
     })
 
-    setChar1(getRandomCharacter());
+    setChar1("Steve");
     setChar2(getRandomCharacter());
   }, []);
 
   useEffect(() => {
     if (char1 === char2) {
-      setChar2(getRandomCharacter())
+      setChar2("Shulk")
     }
 
   }, [char1]);
@@ -318,15 +318,15 @@ export default function Component() {
           let evenBadge = evenWinrate >= 50 ? "bg-blue-500" : "bg-red-500";
           if (skill === "Matchup") {
             if (winner === char1) {
-              char1Badge = char1Winrate >= 50 ? "bg-blue-500" : "bg-red-500";
+              char1Badge = char1Winrate >= 33 ? "bg-blue-500" : "bg-red-500";
               char2Badge = "bg-gray-500";
               evenBadge = "bg-gray-500";
             } else if (winner === char2) {
-              char2Badge = char2Winrate >= 50 ? "bg-blue-500" : "bg-red-500";
+              char2Badge = char2Winrate >= 33 ? "bg-blue-500" : "bg-red-500";
               char1Badge = "bg-gray-500";
               evenBadge = "bg-gray-500";
             } else {
-              evenBadge = evenWinrate >= 50 ? "bg-blue-500" : "bg-red-500";
+              evenBadge = evenWinrate >= 33 ? "bg-blue-500" : "bg-red-500";
               char1Badge = "bg-gray-500";
               char2Badge = "bg-gray-500";
             }
@@ -422,24 +422,13 @@ export default function Component() {
                       {currentSkill !== skills.length - 1 ? "who's better at..." : "who wins the"}
                     </text>
                     <text className="text-5xl font-mono text-blue-600">{skills[currentSkill]}</text>
-                    <div>
-                      {currentSkill === skills.length - 1 && (
-                        <div className="flex min-w-[60%] justify-center mt-2">
-                          <button
-                            className="px-8 py-1 bg-gray-300 text-gray font-mono text-sm font-bold rounded hover:bg-gray-100 transition-colors"
-                            onClick={() => handleChoice("Even")}
-                          >
-                            Even
-                          </button>
-                        </div>
-                      )}
-                    </div>
+
                   </div>
 
                   <div className="w-[100%] pt-10 flex justify-between items-center mb-8">
-                    <div className={"flex"}>
+                    <div className={"flex min-w-[40%]"}>
                       <button
-                        className={`min-w-60  text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
+                        className={`self-start min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
                         onClick={() => handleChoice(char1)}
                       >
                         <div className={'flex font-mono flex-col items-center'}>
@@ -456,8 +445,19 @@ export default function Component() {
                         </div>
                       </button>
                     </div>
-
-                    <div className={"flex"}>
+                    <div>
+                      {currentSkill === skills.length - 1 && (
+                        <div className="flex min-w-[60%] justify-center mt-2">
+                          <button
+                            className="px-8 py-4 border-2 border-blue-500 text-blue-600 font-mono text-md font-bold rounded hover:bg-gray-100 transition-colors"
+                            onClick={() => handleChoice("Even")}
+                          >
+                            Even
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                    <div className={"flex justify-end min-w-[40%]"}>
 
                       <button
                         className={`min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
