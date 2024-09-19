@@ -61,13 +61,13 @@ export default function Component() {
       setMatchupWinrates(data);
     })
 
-    setChar1(getRandomCharacter());
-    setChar2(getRandomCharacter());
+    setChar1("Steve");
+    setChar2("Shulk");
   }, []);
 
   useEffect(() => {
     if (char1 === char2) {
-      setChar2(getRandomCharacter());
+      setChar2("Shulk")
     }
 
   }, [char1]);
@@ -91,54 +91,56 @@ export default function Component() {
   }, []);
 
 
-  async function addToFirestore(skill: string, winner: string, loser: string) {
+  async function addToFirestore(skill: string, even: boolean, winner: string, loser: string) {
     if (!db) return;
     const skillDocRef = doc(db, "skills", skill);
 
-    try {
-      // Get the current document for the skill
-      const skillDoc = await getDoc(skillDocRef);
+    if (!even) { // if not even, then we update the win/losses for the characters
+      try {
+        // Get the current document for the skill
+        const skillDoc = await getDoc(skillDocRef);
 
-      if (skillDoc.exists() && skillDoc.data()) {
-        {
-          // If the document exists, update wins and losses for the characters
-          const currentData = skillDoc.data();
+        if (skillDoc.exists() && skillDoc.data()) {
+          {
+            // If the document exists, update wins and losses for the characters
+            const currentData = skillDoc.data();
 
-          if (currentData) {
-            const winnerAttributeName = `${winner}Wins`;
-            const winnerAttributeNameLosses = `${winner}Losses`;
-            const loserAttributeName = `${loser}Losses`;
-            const loserAttributeNameWins = `${loser}Wins`;
-            const winnerWins = currentData[winnerAttributeName] || 0;
-            const loserLosses = currentData[loserAttributeName] || 0;
+            if (currentData) {
+              const winnerAttributeName = `${winner}Wins`;
+              const winnerAttributeNameLosses = `${winner}Losses`;
+              const loserAttributeName = `${loser}Losses`;
+              const loserAttributeNameWins = `${loser}Wins`;
+              const winnerWins = currentData[winnerAttributeName] || 0;
+              const loserLosses = currentData[loserAttributeName] || 0;
 
-            // for winrate (as double)
-            const winnerLosses = currentData[winnerAttributeNameLosses] || 0;
-            const loserWins = currentData[loserAttributeNameWins] || 0;
+              // for winrate (as double)
+              const winnerLosses = currentData[winnerAttributeNameLosses] || 0;
+              const loserWins = currentData[loserAttributeNameWins] || 0;
 
-            const winnerWinrate = (winnerWins + 1) / (winnerWins + winnerLosses + 1);
-            const loserWinrate = loserWins / (loserWins + loserLosses + 1);
+              const winnerWinrate = (winnerWins + 1) / (winnerWins + winnerLosses + 1);
+              const loserWinrate = loserWins / (loserWins + loserLosses + 1);
 
 
-            await updateDoc(skillDocRef, {
-              [winnerAttributeName]: winnerWins + 1,
-              [loserAttributeName]: loserLosses + 1,
-              [`${winner}Winrate`]: parseFloat(winnerWinrate.toFixed(5)),
-              [`${loser}Winrate`]: parseFloat(loserWinrate.toFixed(5)),
-            } as never);
+              await updateDoc(skillDocRef, {
+                [winnerAttributeName]: winnerWins + 1,
+                [loserAttributeName]: loserLosses + 1,
+                [`${winner}Winrate`]: parseFloat(winnerWinrate.toFixed(5)),
+                [`${loser}Winrate`]: parseFloat(loserWinrate.toFixed(5)),
+              } as never);
+            }
           }
+        } else {
+          // If the document doesn't exist, create it with initial win/loss values
+          await setDoc(skillDocRef, {
+            [`${winner}Wins`]: 1,
+            [`${loser}Losses`]: 1,
+            [`${winner}Winrate`]: 1.0,
+            [`${loser}Winrate`]: 0.0,
+          });
         }
-      } else {
-        // If the document doesn't exist, create it with initial win/loss values
-        await setDoc(skillDocRef, {
-          [`${winner}Wins`]: 1,
-          [`${loser}Losses`]: 1,
-          [`${winner}Winrate`]: 1.0,
-          [`${loser}Winrate`]: 0.0,
-        });
+      } catch (error) {
+        console.error("Error updating Firestore: ", error);
       }
-    } catch (error) {
-      console.error("Error updating Firestore: ", error);
     }
 
     // Match Up winrate
@@ -152,22 +154,36 @@ export default function Component() {
         const winnerWins = currentData[`${charactersString}-${winner}`] || 0;
         const loserWins = currentData[`${charactersString}-${loser}`] || 0;
         const totalGames = currentData[`${charactersString}-totalGames`] || 0;
+        const evenGames = currentData[`${charactersString}-Even`] || 0;
         const winnerWinrate = totalGames === 0 ? 1.0 : parseFloat(String((winnerWins + 1) / (totalGames + 1))).toFixed(5);
-        const loserWinrate = totalGames === 0 ? 0.0 : parseFloat(String((totalGames - winnerWins) / (totalGames + 1))).toFixed(5);
-        await updateDoc(rankingsDocRef, {
-          [`${charactersString}-${winner}`]: winnerWins + 1,
-          [`${charactersString}-${loser}`]: loserWins,
-          [`${charactersString}-totalGames`]: totalGames + 1,
-          [`${charactersString}-${winner}Winrate`]: winnerWinrate,
-          [`${charactersString}-${loser}Winrate`]: loserWinrate,
-
-        } as never);
+        const loserWinrate = totalGames === 0 ? 0.0 : parseFloat(String((loserWins) / (totalGames + 1))).toFixed(5);
+        if (!even) {
+          await updateDoc(rankingsDocRef, {
+            [`${charactersString}-${winner}`]: winnerWins + 1,
+            [`${charactersString}-${loser}`]: loserWins,
+            [`${charactersString}-totalGames`]: totalGames + 1,
+            [`${charactersString}-Even`]: evenGames,
+            [`${charactersString}-EvenWinrate`]: parseFloat(String(evenGames / (totalGames + 1))).toFixed(4),
+            [`${charactersString}-${winner}Winrate`]: winnerWinrate,
+            [`${charactersString}-${loser}Winrate`]: loserWinrate,
+          } as never);
+        } else {
+          await updateDoc(rankingsDocRef, {
+            [`${charactersString}-Even`]: evenGames + 1,
+            [`${charactersString}-${winner}Winrate`]: parseFloat(String((winnerWins) / (totalGames + 1))).toFixed(5),
+            [`${charactersString}-${loser}Winrate`]: parseFloat(String((loserWins) / (totalGames + 1))).toFixed(5),
+            [`${charactersString}-EvenWinrate`]: totalGames === 0 ? 0.0 : parseFloat(String((evenGames + 1) / (totalGames + 1))).toFixed(4),
+            [`${charactersString}-totalGames`]: totalGames + 1,
+          } as never);
+        }
       }
     } else {
       // If the document doesn't exist, create it with initial win/loss values
       await setDoc(rankingsDocRef, {
         [`${charactersString}-${winner}`]: 1,
         [`${charactersString}-${loser}`]: 0,
+        [`${charactersString}-Even`]: 0,
+        [`${charactersString}-EvenWinrate`]: 0,
         [`${charactersString}-totalGames`]: 1,
         [`${charactersString}-${winner}Winrate`]: 1.0,
         [`${charactersString}-${loser}Winrate`]: 0.0,
@@ -182,8 +198,10 @@ export default function Component() {
     // save the game memory, include the winner, loser, and the skill for each choice
     setGameMemory((prev) => ({...prev, [skills[currentSkill]]: choice}))
     setCurrentSkill((skill) => skill + 1)
+
     await addToFirestore(
       skills[currentSkill],
+      choice === "Even",
       choice === char1 ? char1 : char2,
       choice === char1 ? char2 : char1
     );
@@ -218,21 +236,23 @@ export default function Component() {
     return (
 
       <div
-        className="mt-6 flex flex-col items-center justify-center bg-white min-h-[600px] rounded- w-full sm:max-w-[90%] md:max-w-[80%] p-2">
-        <div className={"px-[6%]  flex flex-row justify-between w-[100%] items-center"}>
+        className="mt-62flex flex-col items-center justify-center bg-white min-h-[600px] rounded- w-full sm:max-w-[90%] md:max-w-[80%] p-2">
+        {currentSkill === skills.length && (
 
-          <img
-            src={CharacterPhotoUrls[char1] as keyof typeof CharacterPhotoUrls}
-            alt="avatar"
-            className="self-left w-28"/>
+          <div className={"px-[6%]  flex flex-row justify-between w-[100%] items-center"}>
+            <img
+              src={CharacterPhotoUrls[char1] as keyof typeof CharacterPhotoUrls}
+              alt="avatar"
+              className="self-left w-28"/>
 
-          <text className={"text-5xl font-mono text-blue-500 font-bold"}>Results</text>
+            <text className={"text-5xl font-mono text-blue-500 font-bold"}>Results</text>
 
-          <img
-            src={CharacterPhotoUrls[char2] as keyof typeof CharacterPhotoUrls}
-            alt="avatar"
-            className="self-right w-28"/>
-        </div>
+            <img
+              src={CharacterPhotoUrls[char2] as keyof typeof CharacterPhotoUrls}
+              alt="avatar"
+              className="self-right w-28"/>
+          </div>
+        )}
         {Object.entries(gameMemory).map(([skill, winner]) => {
           let WinrateDocument = movementWinrates;
           if (skill === "Movement") {
@@ -248,13 +268,65 @@ export default function Component() {
           } else if (skill === "Matchup") {
             WinrateDocument = MatchupWinrates;
           }
-          const chosenCharacterWinrate = WinrateDocument ? findWinrate(
+
+
+          let char1Winrate: number = WinrateDocument ? findWinrate(
             WinrateDocument,
-            winner,
-            winner === char1 ? char2 : char1
-          ) * 100 : 100;
+            char1,
+            char2,
+          ) * 100 : 0;
           // const notChosenCharacterWinrate = 100 - chosenCharacterWinrate;
-          const badge = chosenCharacterWinrate >= 50 ? "bg-blue-500" : "bg-red-500";
+          let char2Winrate: number = WinrateDocument ? findWinrate(
+            WinrateDocument,
+            char2,
+            char1,
+          ) * 100 : 0;
+          const vsString = getVSString(char1, char2);
+          const string = vsString + `-EvenWinrate`
+          let evenWinrate = WinrateDocument ? (WinrateDocument[string] * 100) : 0;
+          if (isNaN(evenWinrate)) {
+            evenWinrate = 0;
+          }
+
+          if (char1Winrate === 100 && char2Winrate === 100) {
+            // then we have no data on this matchup
+            // give winner 100% winrate and loser 0% winrate
+            if (winner === char1) {
+              char1Winrate = 100;
+              char2Winrate = 0;
+            } else if (winner === char2) {
+              char1Winrate = 0;
+              char2Winrate = 100;
+            } else {
+              char1Winrate = 0;
+              char2Winrate = 0;
+              evenWinrate = 100;
+            }
+          }
+
+          const evenWinrateString = parseFloat(String(evenWinrate)).toFixed(2);
+          const char1WinrateString = parseFloat(String(char1Winrate)).toFixed(2);
+          const char2WinrateString = parseFloat(String(char2Winrate)).toFixed(2);
+
+
+          let char1Badge = char1Winrate >= 50 ? "bg-blue-500" : "bg-red-500";
+          let char2Badge = char2Winrate >= 50 ? "bg-blue-500" : "bg-red-500";
+          let evenBadge = evenWinrate >= 50 ? "bg-blue-500" : "bg-red-500";
+          if (skill === "Matchup") {
+            if (winner === char1) {
+              char1Badge = char1Winrate >= 50 ? "bg-blue-500" : "bg-red-500";
+              char2Badge = "bg-gray-500";
+              evenBadge = "bg-gray-500";
+            } else if (winner === char2) {
+              char2Badge = char2Winrate >= 50 ? "bg-blue-500" : "bg-red-500";
+              char1Badge = "bg-gray-500";
+              evenBadge = "bg-gray-500";
+            } else {
+              evenBadge = evenWinrate >= 50 ? "bg-blue-500" : "bg-red-500";
+              char1Badge = "bg-gray-500";
+              char2Badge = "bg-gray-500";
+            }
+          }
 
 
           return (
@@ -271,11 +343,11 @@ export default function Component() {
                     className={'w-[40%] rounded-2xl min-h-[40px] flex justify-between text-center items-center'}>
                     <text className={`font-bold text-center`}>
                       {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
-                      {winner === char1 && (
+                      {(winner === char1 || skill === "Matchup") && (
                         <div>
                           <span
-                            className={`${badge} min-h-[50px] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
-                            {chosenCharacterWinrate.toFixed(1)}% agreed
+                            className={`${char1Badge} min-h-[50px] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                              {skill === "Matchup" ? `${char1WinrateString}% picked ${char1}` : `${char1WinrateString}% agreed`}
                           </span>
                         </div>
                       )}
@@ -283,21 +355,28 @@ export default function Component() {
                     </text>
 
                   </div>
-                  <div className={"w-[100%]"}>
+                  <div className={"w-fit flex flex-col"}>
                     <text className="text-xl text-black">{skill}</text>
+                    {skill === "Matchup" && (
+                      <span
+                        className={`${evenBadge} min-w-[50%] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                              {evenWinrateString}% picked even
+                            </span>
+                    )}
                   </div>
 
                   <div className={'w-[40%] rounded-2xl flex flex-row justify-end text-right'}>
                     <text className={`font-bold flex text-right self-end flex-end`}>
                       {/*/!*{skill !== "Matchup" && `Rank #${char2Rank}`}*!/*/}
-                      {winner === char2 && (
+                      {(winner === char2 || skill === "Matchup") && (
                         <div className={"flex-end"}>
-                            <span
-                              className={`${badge} text-white min-h-[50px] text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
-                              {chosenCharacterWinrate.toFixed(1)}% agreed
+                              <span
+                                className={`${char2Badge} text-white min-h-[50px] text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                              {skill === "Matchup" ? `${char2WinrateString}% picked ${char2}` : `${char2WinrateString}% agreed`}
                             </span>
                         </div>
                       )}
+
 
                     </text>
                   </div>
@@ -306,7 +385,7 @@ export default function Component() {
             </div>
           )
         })}
-        <div className="flex justify-center">
+        <div className="mt-4 flex justify-center">
           <button
             className="px-4 py-2 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-colors"
             onClick={newCharacters}
@@ -333,11 +412,24 @@ export default function Component() {
 
                 <div className="w-[80%] sm:w-[100%]">
 
-                  <div className="text-xl text-zinc-950 flex items-center flex-col font-semibold text-center mb-6">
+                  <div
+                    className="text-xl h-32 text-zinc-950 flex items-center flex-col font-semibold text-center pb-6">
                     <text className={'text-xl font-mono text-black font-light'}>
                       {currentSkill !== skills.length - 1 ? "who's better at..." : "who wins the"}
                     </text>
                     <text className="text-5xl font-mono text-blue-600">{skills[currentSkill]}</text>
+                    <div>
+                      {currentSkill === skills.length - 1 && (
+                        <div className="flex min-w-[60%] justify-center mt-2">
+                          <button
+                            className="px-8 py-1 bg-gray-300 text-gray font-mono text-sm font-bold rounded hover:bg-gray-100 transition-colors"
+                            onClick={() => handleChoice("Even")}
+                          >
+                            Even
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="w-[100%] pt-10 flex justify-between items-center mb-8">
@@ -360,6 +452,7 @@ export default function Component() {
                         </div>
                       </button>
                     </div>
+
                     <div className={"flex"}>
 
                       <button
@@ -379,10 +472,10 @@ export default function Component() {
                           </text>
                         </div>
                       </button>
-
                     </div>
                   </div>
                 </div>
+
 
                 <div className="flex justify-center mt-4">
                   <button
