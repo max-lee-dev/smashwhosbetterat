@@ -61,13 +61,13 @@ export default function Component() {
       setMatchupWinrates(data);
     })
 
-    setChar1("Steve");
-    setChar2("Shulk");
+    setChar1(getRandomCharacter());
+    setChar2(getRandomCharacter());
   }, []);
 
   useEffect(() => {
     if (char1 === char2) {
-      setChar2("Shulk")
+      setChar2(getRandomCharacter())
     }
 
   }, [char1]);
