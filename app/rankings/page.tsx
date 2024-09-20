@@ -139,8 +139,8 @@ export default function Ranking() {
     if (!name.includes("Winrate"))
       return (
         <div className="font-mono flex items-center justify-between">
-          <div className=" w-[50%] flex items-center">
-            <div className={"w-[15%]"}>
+          <div className="w-[100%] md:w-[50%] flex items-center">
+            <div className={"w-[40%] md:w-[15%]"}>
               <img
                 src={characterImage}
                 alt="avatar"
@@ -162,28 +162,43 @@ export default function Ranking() {
   return (
     <div className="min-h-screen bg-white flex items-center flex-col justify-center p-4">
       <Navbar/>
-      <div className="bg-white shadow-lg rounded-lg p-4 w-[70%]">
+      <div className="bg-white shadow-lg rounded-lg p-4 w-[95%] md:w-[70%]">
 
         <div className={"bg-white border w-full rounded-md p-4 flex sticky top-2"}>
-
-
-          {skills.map((s, index) => (
-            <button
-              key={index}
-              onClick={() => chooseSkill(index)}
-              className={`w-[80%] text-center text-black font-bold p-2 rounded-lg ${
-                index === skill ? "bg-blue-100" : ""
-              }`}
+          <div className="block md:hidden w-full">
+            <select
+              className="w-full text-blue-500 text-extrabold font-mono px-4 p-2 bg-gray-100 border rounded-lg"
+              value={skill}
+              onChange={(e) => chooseSkill(parseInt(e.target.value))}
             >
-              {s}
-            </button>
-          ))}
+              {skills.map((s, index) => (
+                <option key={index} value={index}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className={"hidden md:flex w-full"}>
+            {skills.map((s, index) => (
+              <button
+                key={index}
+                onClick={() => chooseSkill(index)}
+                className={`w-[80%] text-center text-black font-bold p-2 rounded-lg ${
+                  index === skill ? "bg-blue-100" : ""
+                }`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
         </div>
         {sortedRanking?.map((entry, index) => (
           <div key={index} className="mt-4">
             {character(entry.name, "", entry.rank, entry.winrate)}
           </div>
         ))}
+
       </div>
       <button
         onClick={() => router.push("/rankings")}
