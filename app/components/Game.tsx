@@ -61,13 +61,13 @@ export default function Component() {
       setMatchupWinrates(data);
     })
 
-    setChar1("Steve");
+    setChar1(getRandomCharacter());
     setChar2(getRandomCharacter());
   }, []);
 
   useEffect(() => {
     if (char1 === char2) {
-      setChar2("Shulk")
+      setChar2(getRandomCharacter())
     }
 
   }, [char1]);
@@ -348,7 +348,7 @@ export default function Component() {
                     {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
                     {(winner === char1 || skill === "Matchup") && (
                       <div
-                        className={`${char1Badge} font-bold text-center w-[70%] mr-auto sm:min-h-[50px] sm:w-[50%] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                        className={`${char1Badge} mr-auto font-bold text-center w-[80px] self-end justify-end sm:w-[50%] sm:min-h-[50px] text-white text-xs sm:text-[16px] font-bold me-2 px-2.5 py-0.5 rounded flex items-center justify-center`}>
                           <span
                             className={``}>
                               {skill === "Matchup" ? `${char1WinrateString}% picked ${char1}` : `${char1WinrateString}% agreed`}
@@ -359,25 +359,25 @@ export default function Component() {
 
                   </div>
                   <div className={"w-fit flex flex-col"}>
-                    <text className="text-xl text-black">{skill}</text>
+                    <text className="text-sm font-bold  sm:text-xl text-black">{skill}</text>
                     {skill === "Matchup" && (
                       <span
-                        className={`${evenBadge} min-w-[50%] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
+                        className={`${evenBadge} min-w-[50%] text-white text-xs sm:text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
                               {evenWinrateString}% picked even
                             </span>
                     )}
                   </div>
 
                   <div
-                    className={'w-[40%]  rounded-2xl min-h-[40px] flex flex-row'}>
+                    className={'w-[40%] rounded-2xl min-h-[40px] flex flex-col items-center'}>
                     {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
                     {(winner === char2 || skill === "Matchup") && (
                       <div
-                        className={`${char2Badge} ml-auto font-bold text-center w-[70%] self-end justify-end sm:w-[50%] sm:min-h-[50px] text-white text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
-                          <span
-                            className={``}>
-                              {skill === "Matchup" ? `${char2WinrateString}% picked ${char2}` : `${char2WinrateString}% agreed`}
-                          </span>
+                        className={`${char2Badge} ml-auto font-bold text-center w-[80px] self-end justify-end sm:w-[50%] sm:min-h-[50px] text-white text-xs sm:text-[16px] font-bold me-2 px-2.5 py-0.5 rounded flex items-center justify-center`}>
+                        <span
+                          className={`w-[100%] sm:width-[75%]`}>
+                          {skill === "Matchup" ? `${char2WinrateString}% picked ${char2}` : `${char2WinrateString}% agreed`}
+                        </span>
                       </div>
                     )}
                   </div>
@@ -418,11 +418,11 @@ export default function Component() {
                     <text className={'text-xl font-mono text-black font-light'}>
                       {currentSkill !== skills.length - 1 ? "who's better at..." : "who wins the"}
                     </text>
-                    <text className="text-5xl font-mono text-blue-600">{skills[currentSkill]}</text>
+                    <text className="text-4xl sm:text-5xl font-mono text-blue-600">{skills[currentSkill]}</text>
 
                   </div>
 
-                  <div className="w-[100%] pt-10 flex justify-between items-center mb-8">
+                  <div className="w-[100%] pt-6 sm:pt-10 flex justify-between items-center mb-8">
                     <div className={"flex min-w-[25%] sm:min-w-[40%]"}>
                       <button
                         className={`self-start min-w-[35%] sm:min-w-60 text-lg text-blue-950 font-bold border-gray-300 rounded-lg hover:bg-gray-300 transition-colors`}
@@ -493,7 +493,7 @@ export default function Component() {
 
                 <div className="flex justify-center mt-4">
                   <button
-                    className="px-12 py-1 bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-colors"
+                    className="px-6 sm:px-12 py-1 text-sm md:text-md bg-blue-500 text-white font-bold rounded hover:bg-blue-600 transition-colors"
                     onClick={newCharacters}
                   >
                     Skip
