@@ -18,6 +18,7 @@ export const Footer = () => {
           href={"https://youtube.com/@Spenkr"}
           className={"text-blue-500"}>Spenkr</a>&apos;s lil bro &gt;:)
         </p>
+        <p className="text-center">created 9/19/24</p>
       </div>
       {/*<div className={"self-end"}>*/}
       {/*  <p>2021</p>*/}
