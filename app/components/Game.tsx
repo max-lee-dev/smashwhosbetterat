@@ -222,7 +222,7 @@ export default function Component() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: `<@207599644430172163> ${thisDate}\nNew game started! This user has played ${curTotalGames} games this session.`,
+          content: `<@207599644430172163> ${thisDate}\nNew game started! This user has played ${curTotalGames} games total.`,
         }),
       });
       return newNumGames;
