@@ -407,7 +407,7 @@ export default function Component() {
         <Collapse in={currentSkill < skills.length}
                   className={'justify-self-center flex-col flex items-center justify-center self-center w-[100%]'}>
           <Center>
-            <div className={"w-[100%] bg-red-50 min-[560px]:w-[60%] self-center"}>
+            <div className={"w-[100%] min-[560px]:w-[60%] self-center"}>
 
               <div className={"flex-col pt-10 pb-10 items-center justify-center"}>
 
