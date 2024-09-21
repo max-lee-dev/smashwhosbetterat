@@ -11,10 +11,13 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
   const [filteredMatchupData, setFilteredMatchupData] = useState<DocumentData | null>(null);
 
   useEffect(() => {
+    console.log(isOpen, character, matchupWinrates);
     if (isOpen && character && matchupWinrates) {
+
       // Filter matchups where the selected character is involved
       const filteredData = Object.entries(matchupWinrates)
         .filter(([key]) => key.includes(character))
+        .filter(([key]) => key.includes("Winrate"))
         .reduce((acc, [key, value]) => ({...acc, [key]: value}), {});
 
       setFilteredMatchupData(filteredData);
@@ -30,17 +33,23 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
   }
 
   return (
-    <div onClick={handleOverlayClick} className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div onClick={handleOverlayClick}
+         className="fixed inset-0 text-black bg-black bg-opacity-50 flex items-center justify-center">
       <div className="bg-white rounded-lg p-8 shadow-lg w-[90%] max-w-md">
         <h2 className="text-xl font-bold mb-4">{character} {skill} Matchups</h2>
         <div>
           {Object.entries(filteredMatchupData).length > 0 ? (
             <ul>
-              {Object.entries(filteredMatchupData).map(([key, value]) => (
-                <li key={key} className="mb-2">
-                  {key}: {value}
-                </li>
-              ))}
+              {Object.entries(filteredMatchupData).map(([key, value]) => {
+                  const cleaned = key.split("vs ")[1].trim();
+                  // idk
+                  return (
+                    <li key={key} className="mb-2">
+                      {opponent}: {value}
+                    </li>
+                  )
+                }
+              )}
             </ul>
           ) : (
             <p>No matchup data available for {character}.</p>
