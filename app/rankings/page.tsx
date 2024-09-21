@@ -4,7 +4,6 @@ import {characters, skills} from "@/app/components/Game";
 import {doc, DocumentData, getDoc, setDoc} from "@firebase/firestore";
 import {db} from "@/firebase";
 import {CharacterPhotoUrls} from "@/app/files/photos";
-import {useRouter} from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
 import MatchupModal from "@/app/components/MatchupModal";
@@ -68,7 +67,6 @@ export default function Ranking() {
       })
     }
   }, [skill]);
-  const router = useRouter();
 
   function openModal(character: string, skill: string) {
     setSelectedCharacter(character);
@@ -188,6 +186,8 @@ export default function Ranking() {
 
   function chooseSkill(index: number) {
     setSkill(index);
+    const DocumentData = [movementWinrates, EdgeGuardingWinrates, RecoveryWinrates, CombosWinrates, DefenseWinrates, MatchupWinrates];
+    setCurrentSkillWinrates(DocumentData[index]);
 
     const thisData = data?.find(d => d.skill === skills[index])?.data;
 
@@ -221,10 +221,10 @@ export default function Ranking() {
           </div>
         </div>
         <button
-          className="ml-4 t bg-blue-500 text-white py-1 px-3 rounded"
+          className="mr-4 bg-blue-500 text-xs sm:text-md text-white py-1 px-2 rounded"
           onClick={() => openModal(realName, skill)}
         >
-          View Matchups
+          Data (wip)
         </button>
         <div>
           <p className="text-md font-bold text-gray-600">#{rank}</p>
@@ -264,7 +264,7 @@ export default function Ranking() {
       <MatchupModal
         isOpen={isModalOpen}
         character={selectedCharacter}
-        matchupWinrates={MatchupWinrates}
+        matchupWinrates={CurrentSkillWinrates ?? movementWinrates}
         skill={selectedSkill}
         onClose={closeModal}
       />
