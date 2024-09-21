@@ -10,6 +10,11 @@ export function getVSString(char1: string, char2: string) {
   }
 }
 
+export function deconstructVSString(vsString: string) {
+  const split = vsString.split(" vs ");
+  return [split[0], split[1]];
+}
+
 export async function getWinrateDocument(skill: string) {
   const rankingsDocRef = doc(db, "skills", skill, "Matchups", "Winrates");
   const rankingsDoc = await getDoc(rankingsDocRef);

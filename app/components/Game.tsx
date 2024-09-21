@@ -97,30 +97,17 @@ export default function Component() {
 
     if (!even) {
       try {
-        // Get the current document for the skill
-        const skillDoc = await getDoc(skillDocRef);
+        // Use setDoc with merge option to either create or update the document
+        await setDoc(skillDocRef, {
+          [`${winner}Wins`]: increment(1),
+          [`${loser}Losses`]: increment(1),
+        }, {merge: true});
 
-        if (skillDoc.exists() && skillDoc.data()) {
-          // If the document exists, use FieldValue.increment() to update wins and losses
-          await updateDoc(skillDocRef, {
-            [`${winner}Wins`]: increment(1),
-            [`${loser}Losses`]: increment(1),
-          } as never);
-        } else {
-          // If the document doesn't exist, create it with initial win/loss values
-          await setDoc(skillDocRef, {
-            [`${winner}Wins`]: 1,
-            [`${loser}Losses`]: 1,
-            [`${winner}Winrate`]: 1.0,
-            [`${loser}Winrate`]: 0.0,
-          });
-        }
+        // Optionally, calculate winrate logic here, if needed
       } catch (error) {
         console.error("Error updating Firestore: ", error);
       }
     }
-
-
     // Match Up winrate
     const charactersString = getVSString(winner, loser);
     const rankingsDocRef = doc(db, "skills", skill, "Matchups", "Winrates");
