@@ -17,6 +17,16 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
     };
   };
   const [filteredMatchupData, setFilteredMatchupData] = useState<DocumentData | null>(null);
+  useEffect(() => {
+    function handleEscapePress(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    }
+
+    window.addEventListener("keydown", handleEscapePress);
+    return () => window.removeEventListener("keydown", handleEscapePress);
+  }, []);
 
   useEffect(() => {
     console.log(isOpen, character, matchupWinrates);
@@ -46,6 +56,9 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
 
   if (!isOpen || !character || !skill || !filteredMatchupData) return null;
 
+  // event listener for when escape is pressed, close modal
+
+
   function handleOverlayClick(e: React.MouseEvent<HTMLDivElement, MouseEvent>) {
     if (e.target === e.currentTarget) {
       onClose();
@@ -55,12 +68,12 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
   return (
     <div onClick={handleOverlayClick}
          className="fixed inset-0 text-black bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-8 shadow-lg w-[90%] max-w-md">
+      <div className="bg-white rounded-lg p-8 shadow-lg w-[70%] h-[90%]">
         <div className={"flex items-end"}>
           <img src={CharacterPhotoUrls[character]} alt="avatar" className="h-24"/>
           <h2 className="text-xl font-bold mb-4">{character} {skill} Data</h2>
         </div>
-        <div>
+        <div className={"overflow-y-scroll h-[80%]"}>
           {Object.entries(filteredMatchupData).length > 0 ? (
             <ul>
               {Object.entries(filteredMatchupData).map(([key, value], index) => {
@@ -88,7 +101,9 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
                     )}
                     <div className={"flex flex-row"}>
                       {hasCharacter && (
-                        <img src={CharacterPhotoUrls[opponent]} alt="avatar" className="w-16"/>
+                        <div className={"min-w-16"}>
+                          <img src={CharacterPhotoUrls[opponent]} alt="avatar" className="h-16"/>
+                        </div>
                       )}
                       {hasCharacter && (
 
@@ -110,6 +125,7 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
                   </div>
                 );
               })}
+
             </ul>
           ) : (
             <p>No {skill} data available for {character}.</p>
