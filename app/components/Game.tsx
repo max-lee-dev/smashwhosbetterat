@@ -1,6 +1,6 @@
 "use client";
 import {useEffect, useState} from 'react'
-import {doc, DocumentData, getDoc, setDoc, updateDoc} from '@firebase/firestore';
+import {doc, DocumentData, getDoc, increment, setDoc, updateDoc} from '@firebase/firestore';
 import {db} from '@/firebase';
 import {CharacterPhotoUrls} from "@/app/files/photos";
 import Navbar from "@/app/components/Navbar";
@@ -95,40 +95,17 @@ export default function Component() {
     if (!db) return;
     const skillDocRef = doc(db, "skills", skill);
 
-    if (!even) { // if not even, then we update the win/losses for the characters
+    if (!even) {
       try {
         // Get the current document for the skill
         const skillDoc = await getDoc(skillDocRef);
 
         if (skillDoc.exists() && skillDoc.data()) {
-          {
-            // If the document exists, update wins and losses for the characters
-            const currentData = skillDoc.data();
-
-            if (currentData) {
-              const winnerAttributeName = `${winner}Wins`;
-              const winnerAttributeNameLosses = `${winner}Losses`;
-              const loserAttributeName = `${loser}Losses`;
-              const loserAttributeNameWins = `${loser}Wins`;
-              const winnerWins = currentData[winnerAttributeName] || 0;
-              const loserLosses = currentData[loserAttributeName] || 0;
-
-              // for winrate (as double)
-              const winnerLosses = currentData[winnerAttributeNameLosses] || 0;
-              const loserWins = currentData[loserAttributeNameWins] || 0;
-
-              const winnerWinrate = (winnerWins + 1) / (winnerWins + winnerLosses + 1);
-              const loserWinrate = loserWins / (loserWins + loserLosses + 1);
-
-
-              await updateDoc(skillDocRef, {
-                [winnerAttributeName]: winnerWins + 1,
-                [loserAttributeName]: loserLosses + 1,
-                [`${winner}Winrate`]: parseFloat(winnerWinrate.toFixed(5)),
-                [`${loser}Winrate`]: parseFloat(loserWinrate.toFixed(5)),
-              } as never);
-            }
-          }
+          // If the document exists, use FieldValue.increment() to update wins and losses
+          await updateDoc(skillDocRef, {
+            [`${winner}Wins`]: increment(1),
+            [`${loser}Losses`]: increment(1),
+          } as never);
         } else {
           // If the document doesn't exist, create it with initial win/loss values
           await setDoc(skillDocRef, {
@@ -142,6 +119,7 @@ export default function Component() {
         console.error("Error updating Firestore: ", error);
       }
     }
+
 
     // Match Up winrate
     const charactersString = getVSString(winner, loser);
