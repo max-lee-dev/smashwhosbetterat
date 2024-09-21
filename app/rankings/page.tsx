@@ -1,83 +1,18 @@
 "use client";
 import {useEffect, useState} from "react";
 import {characters, skills} from "@/app/components/Game";
-import {doc, DocumentData, getDoc, setDoc} from "@firebase/firestore";
+import {doc, getDoc, setDoc} from "@firebase/firestore";
 import {db} from "@/firebase";
 import {CharacterPhotoUrls} from "@/app/files/photos";
 import {useRouter} from "next/navigation";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
-import MatchupModal from "@/app/components/MatchupModal";
-import {getWinrateDocument} from "@/app/utils/utils";
 
 export default function Ranking() {
   const [skill, setSkill] = useState(0);
   const [data, setData] = useState<{ skill: string, data: Record<string, { rank: number, winrate: number }> }[]>();
   const [sortedRanking, setSortedRanking] = useState<{ name: string, rank: number, winrate: number }[]>();
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
-  const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
-  const [movementWinrates, setMovementWinrates] = useState<DocumentData | null>(null);
-  const [EdgeGuardingWinrates, setEdgeGuardingWinrates] = useState<DocumentData | null>(null);
-  const [RecoveryWinrates, setRecoveryWinrates] = useState<DocumentData | null>(null);
-  const [CombosWinrates, setCombosWinrates] = useState<DocumentData | null>(null);
-  const [DefenseWinrates, setDefenseWinrates] = useState<DocumentData | null>(null);
-  const [MatchupWinrates, setMatchupWinrates] = useState<DocumentData | null>(null);
-  const [CurrentSkillWinrates, setCurrentSkillWinrates] = useState<DocumentData | null>(null);
-
-
-  useEffect(() => {
-    if (!movementWinrates) {
-      getWinrateDocument("Movement").then((data) => {
-        if (!data) return;
-        setMovementWinrates(data);
-      })
-    }
-
-    if (!EdgeGuardingWinrates) {
-      getWinrateDocument("EdgeGuarding").then((data) => {
-        if (!data) return;
-        setEdgeGuardingWinrates(data);
-      })
-    }
-    if (!RecoveryWinrates) {
-      getWinrateDocument("Recovery").then((data) => {
-        if (!data) return;
-        setRecoveryWinrates(data);
-      })
-    }
-    if (!CombosWinrates) {
-      getWinrateDocument("Combos").then((data) => {
-        if (!data) return;
-        setCombosWinrates(data);
-      })
-    }
-    if (!DefenseWinrates) {
-      getWinrateDocument("Defense").then((data) => {
-        if (!data) return;
-        setDefenseWinrates(data);
-      })
-    }
-    if (!MatchupWinrates) {
-      getWinrateDocument("Matchups").then((data) => {
-        if (!data) return;
-        setMatchupWinrates(data);
-      })
-    }
-  }, [skill]);
   const router = useRouter();
-
-  function openModal(character: string, skill: string) {
-    setSelectedCharacter(character);
-    setSelectedSkill(skill);
-    setIsModalOpen(true);
-  }
-
-  function closeModal() {
-    setIsModalOpen(false);
-    setSelectedCharacter(null);
-    setSelectedSkill(null);
-  }
 
   async function updateRanking() {
     try {
@@ -125,9 +60,6 @@ export default function Ranking() {
   useEffect(() => {
     updateRanking();
   }, []);
-
-  // make a map for the text of skills to their winrate document:
-
 
   useEffect(() => {
     const fetchRankingData = async () => {
@@ -182,10 +114,8 @@ export default function Ranking() {
     fetchRankingData();
   }, [db]);
 
-
   function chooseSkill(index: number) {
     setSkill(index);
-
     const thisData = data?.find(d => d.skill === skills[index])?.data;
 
     if (thisData) {
@@ -202,72 +132,81 @@ export default function Ranking() {
     }
   }
 
-  function character(name: string, image: string, rank: number, winrate: number, skill: string) {
+  function character(name: string, image: string, rank: number, winrate: number) {
+
     const realName = name.replace("Rank", "");
     const characterImage = CharacterPhotoUrls[realName];
-
-    return (
-      <div className="font-mono flex items-center justify-between">
-        <div className="w-[100%] md:w-[50%] flex items-center">
-          <div className={"w-[40%] md:w-[15%]"}>
-            <img src={characterImage} alt="avatar" className="h-16"/>
+    if (!name.includes("Winrate"))
+      return (
+        <div className="font-mono flex items-center justify-between">
+          <div className="w-[100%] md:w-[50%] flex items-center">
+            <div className={"w-[40%] md:w-[15%]"}>
+              <img
+                src={characterImage}
+                alt="avatar"
+                className="h-16"
+              />
+            </div>
+            <div className="ml-2">
+              <p className="font-bold text-black">{name.replaceAll("Rank", "")}</p>
+              <p className="text-sm text-gray-600">{(winrate * 100).toFixed(2)}%</p>
+            </div>
           </div>
-          <div className="ml-2">
-            <p className="font-bold text-black">{name.replaceAll("Rank", "")}</p>
-            <p className="text-sm text-gray-600">{(winrate * 100).toFixed(2)}%</p>
+          <div>
+            <p className="text-md font-bold text-gray-600">#{rank}</p>
           </div>
         </div>
-        {/*<button*/}
-        {/*  className="ml-4 t bg-blue-500 text-white py-1 px-3 rounded"*/}
-        {/*  onClick={() => openModal(realName, skill)}*/}
-        {/*>*/}
-        {/*  View Matchups (wip)*/}
-        {/*</button>*/}
-        <div>
-          <p className="text-md font-bold text-gray-600">#{rank}</p>
-        </div>
-
-      </div>
-    );
+      );
   }
 
   return (
     <div className="min-h-screen bg-white flex items-center flex-col justify-center p-4">
       <Navbar/>
       <div className="bg-white shadow-lg rounded-lg p-4 w-[95%] md:w-[70%]">
+
         <div className={"bg-white border w-full rounded-md p-4 flex sticky top-2"}>
-          {/* Your skill selection UI */}
+          <div className="block md:hidden w-full">
+            <select
+              className="w-full text-blue-500 text-extrabold font-mono px-4 p-2 bg-gray-100 border rounded-lg"
+              value={skill}
+              onChange={(e) => chooseSkill(parseInt(e.target.value))}
+            >
+              {skills.map((s, index) => (
+                <option key={index} value={index}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className={"hidden md:flex w-full"}>
             {skills.map((s, index) => (
               <button
                 key={index}
                 onClick={() => chooseSkill(index)}
-                className={`w-[80%] text-center text-black font-bold p-2 rounded-lg ${index === skill ? "bg-blue-100" : ""}`}
+                className={`w-[80%] text-center text-black font-bold p-2 rounded-lg ${
+                  index === skill ? "bg-blue-100" : ""
+                }`}
               >
                 {s}
               </button>
             ))}
           </div>
         </div>
-
-        {/* Render sortedRanking */}
         {sortedRanking?.map((entry, index) => (
           <div key={index} className="mt-4">
-            {character(entry.name, "", entry.rank, entry.winrate, skills[skill])}
+            {character(entry.name, "", entry.rank, entry.winrate)}
           </div>
         ))}
+
       </div>
-
-      <MatchupModal
-        isOpen={isModalOpen}
-        character={selectedCharacter}
-        matchupWinrates={MatchupWinrates}
-        skill={selectedSkill}
-        onClose={closeModal}
-      />
-
+      <button
+        onClick={() => router.push("/rankings")}
+        className="fixed bottom-4 font-bold right-4 bg-blue-500 text-white w-16 h-10 p-2 rounded-full"
+      >
+        ^
+      </button>
       <Footer/>
     </div>
-
   );
 }
