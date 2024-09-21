@@ -31,7 +31,7 @@ export const Navbar = () => {
           className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
           onClick={() => router.push("/rankings")}
         >
-          <span className="font-bold">View Rankings</span>
+          <span className="font-bold">Rankings</span>
         </button>
       </div>
 
