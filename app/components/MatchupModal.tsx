@@ -10,11 +10,7 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
   onClose: () => void
 }) {
   type MatchupData = {
-    [key: string]: {
-      wins: number;
-      losses: number;
-      // add any other fields your data structure has
-    };
+    [key: string]: number;
   };
   const [filteredMatchupData, setFilteredMatchupData] = useState<DocumentData | null>(null);
   useEffect(() => {
@@ -29,28 +25,20 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
   }, []);
 
   useEffect(() => {
-    console.log(isOpen, character, matchupWinrates);
     if (isOpen && character && matchupWinrates) {
-
       // Filter matchups where the selected character is involved
+      let filteredData: MatchupData = {};
 
-
-      // sort alphabetically
-      let filteredData: MatchupData = {};  // Make sure filteredData is typed
+      // Filter by character and winrate key
       filteredData = Object.entries(matchupWinrates)
         .filter(([key]) => key.includes(character))
-        .filter(([key]) => key.includes("Winrate"))// filter by winrate
+        .filter(([key]) => key.includes("Winrate")) // filter by winrate
+        .reduce((acc, [key, value]) => ({...acc, [key]: value as number}), {});
 
-        .reduce((acc, [key, value]) => ({...acc, [key]: value}), {});
-
-      //sort by winrate
+      // Sort by winrate (assumes values are numbers)
       filteredData = Object.entries(filteredData)
-        .sort((a, b) => b[1] - a[1])
+        .sort(([, winrateA], [, winrateB]) => winrateB - winrateA)
         .reduce((acc, [key, value]) => ({...acc, [key]: value}), {});
-
-
-      // sort alphabetically
-
 
       setFilteredMatchupData(filteredData);
     }
