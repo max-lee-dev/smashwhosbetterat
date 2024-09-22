@@ -78,7 +78,7 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
         <div className={"overflow-y-scroll h-[75%] sm:h-[72%]"}>
           {Object.entries(filteredMatchupData).length > 0 ? (
             <ul>
-              {Object.entries(filteredMatchupData).map(([key, value]) => {
+              {Object.entries(filteredMatchupData).map(([key, value], idx) => {
                 const opponent = key.replace("vs", "").replace(character, "").replace("Winrate", "").split("-")[0].trim();
                 const formattedKey = key.split("-")[1];
                 const hasEven = formattedKey.includes("Even");
@@ -91,7 +91,7 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
 
                 if (hasCharacter)
                   return (
-                    <div className={"flex flex-row"}>
+                    <div className={"flex flex-row"} key={idx}>
                       <div className={"min-w-16"}>
                         <img src={CharacterPhotoUrls[opponent]} alt="avatar" className="h-16"/>
                       </div>
