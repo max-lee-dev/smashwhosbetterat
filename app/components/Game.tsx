@@ -359,7 +359,7 @@ export default function Component() {
                     {winner === char2 && (
                       <div
                         className={`${char2Badge} ${winner === char2 ? "rounded" : "rounded-xl"} font-bold text-center w-[80px] sm:w-[50%] min-h-[40px] sm:min-h-[50px] text-white text-xs sm:text-[16px] font-bold px-2.5 py-0.5 flex items-center justify-center`}
-                        style={{width: `${char2WinrateString}%`}}
+                        style={{minWidth: "40%", width: `${char2WinrateString}%`}}
                       >
                         <span
                           className={`hidden sm:flex`}>
