@@ -238,9 +238,9 @@ export default function Ranking() {
     <div className="min-h-screen bg-white flex items-center flex-col justify-center p-4">
       <Navbar/>
       <div className="bg-white shadow-lg rounded-lg p-4 w-[95%] md:w-[70%]">
-        <div className={"bg-white border w-full rounded-md p-4 flex sticky top-2"}>
+        <div className={"bg-white border w-full rounded-md flex sticky top-2"}>
           {/* Your skill selection UI */}
-          <div className={"hidden md:flex w-full"}>
+          <div className={"hidden md:flex p-4 w-full"}>
             {skills.map((s, index) => (
               <button
                 key={index}
@@ -250,6 +250,17 @@ export default function Ranking() {
                 {s}
               </button>
             ))}
+          </div>
+          <div className={"flex md:hidden p-2 w-full"}>
+            <select
+              className={"w-full text-blue-600 rounded-md"}
+              value={skill}
+              onChange={(e) => chooseSkill(parseInt(e.target.value))}
+            >
+              {skills.map((s, index) => (
+                <option key={index} value={index}>{s}</option>
+              ))}
+            </select>
           </div>
         </div>
 
