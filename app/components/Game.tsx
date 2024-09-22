@@ -187,7 +187,7 @@ export default function Component() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          content: `<@207599644430172163> ${thisDate}\nNew game started! This user has played ${curTotalGames} games total.`,
+          content: `${thisDate}\nNew game started! This user has played ${curTotalGames} games total.`,
         }),
       });
       return newNumGames;
@@ -277,10 +277,14 @@ export default function Component() {
           const char1WinrateString = parseFloat(String(char1Winrate)).toFixed(2);
           const char2WinrateString = parseFloat(String(char2Winrate)).toFixed(2);
 
-
+          const char1Won = char1Winrate >= 50;
+          const char2Won = char2Winrate >= 50;
           let char1Badge = char1Winrate >= 50 ? "bg-blue-500" : "bg-red-500";
           let char2Badge = char2Winrate >= 50 ? "bg-blue-500" : "bg-red-500";
           let evenBadge = evenWinrate >= 50 ? "bg-blue-500" : "bg-red-500";
+
+          const char1Border = winner === char1 ? char1Won ? "border-[2px] border-blue-500" : "border-[2px] border-red-500" : "";
+          const char2Border = winner === char2 ? char2Won ? "border-[2px] border-blue-500" : "border-[2px] border-red-500" : "";
           if (skill === "Matchup") {
             if (winner === char1) {
               char1Badge = char1Winrate >= 33 ? "bg-blue-500" : "bg-red-500";
@@ -309,39 +313,61 @@ export default function Component() {
                   className={`rounded-md h-[100%] my-2 items-center flex flex-row w-[100%] justify-between`}>
 
                   <div
-                    className={'w-[40%] rounded-2xl min-h-[40px] flex justify-between text-center items-center'}>
+                    className={`w-[40%] ${char1Border} rounded-xl min-h-[30px] sm:min-h-[40px] flex justify-end text-center items-center`}>
                     {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
-                    {(winner === char1 || skill === "Matchup") && (
+                    {winner === char1 && (
                       <div
-                        className={`${char1Badge} mr-auto font-bold text-center w-[80px] self-end justify-end sm:w-[50%] sm:min-h-[50px] text-white text-xs sm:text-[16px] font-bold me-2 px-2.5 py-0.5 rounded flex items-center justify-center`}>
-                          <span
-                            className={``}>
-                              {skill === "Matchup" ? `${char1WinrateString}% picked ${char1}` : `${char1WinrateString}% agreed`}
-                          </span>
+                        className={`${char1Badge} ${winner === char1 ? "rounded" : "rounded-xl"} font-bold text-center justify-center self-end w-[80px] sm:w-[50%] min-h-[40px] sm:min-h-[50px] text-white text-xs sm:text-[16px] px-2 font-bold flex items-center`}
+                        style={{minWidth: "40%", width: `${char1WinrateString}%`}}
+                      >
+                        <span
+                          className={`hidden sm:flex`}>
+                            {skill === "Matchup" ? `${char1WinrateString}% picked ${char1}` : `${char1WinrateString}% agree`}
+                        </span>
+                        <span
+                          className={`flex sm:hidden max-w-[60px]`}>
+                             {skill === "Matchup" ? `${char1WinrateString}% ${char1}` : `${char1WinrateString}% agree`}
+                        </span>
                       </div>
                     )}
 
 
                   </div>
-                  <div className={"w-fit flex flex-col"}>
+                  <div className={"w-fit flex flex-col px-4"}>
                     <text className="text-sm font-bold  sm:text-xl text-black">{skill}</text>
                     {skill === "Matchup" && (
                       <span
-                        className={`${evenBadge} min-w-[50%] text-white text-xs sm:text-sm font-bold me-2 px-2.5 py-0.5 rounded`}>
-                              {evenWinrateString}% picked even
-                            </span>
+                        className={`${evenBadge} ${winner === "Even" ? "rounded" : "rounded-xl"} min-w-[50%] justify-center  text-center text-white rounded text-xs sm:text-sm px-2 font-bold py-0.5`}
+                        style={{minWidth: "100%", width: `${evenWinrateString}%`}}
+                      >
+                         <span
+                           className={`text-center self-center hidden sm:flex`}>
+                          {evenWinrateString}% picked even
+                        </span>
+                        <span
+                          className={`text-center self-center flex sm:hidden`}>
+                            {evenWinrateString}% even
+                        </span>
+                      </span>
+
                     )}
                   </div>
 
                   <div
-                    className={'w-[40%] rounded-2xl min-h-[40px] flex flex-col items-center'}>
+                    className={`w-[40%] ${char2Border} min-h-[30px] sm:min-h-[40px] rounded-xl flex justify-between text-center items-center`}>
                     {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
-                    {(winner === char2 || skill === "Matchup") && (
+                    {winner === char2 && (
                       <div
-                        className={`${char2Badge} ml-auto font-bold text-center w-[80px] self-end justify-end sm:w-[50%] sm:min-h-[50px] text-white text-xs sm:text-[16px] font-bold me-2 px-2.5 py-0.5 rounded flex items-center justify-center`}>
+                        className={`${char2Badge} ${winner === char2 ? "rounded" : "rounded-xl"} font-bold text-center w-[80px] sm:w-[50%] min-h-[40px] sm:min-h-[50px] text-white text-xs sm:text-[16px] font-bold px-2.5 py-0.5 flex items-center justify-center`}
+                        style={{width: `${char2WinrateString}%`}}
+                      >
                         <span
-                          className={`w-[100%] sm:width-[75%]`}>
-                          {skill === "Matchup" ? `${char2WinrateString}% picked ${char2}` : `${char2WinrateString}% agreed`}
+                          className={`hidden sm:flex`}>
+                            {skill === "Matchup" ? `${char2WinrateString}% picked ${char1}` : `${char2WinrateString}% agree`}
+                        </span>
+                        <span
+                          className={`flex sm:hidden max-w-[60px]`}>
+                           {skill === "Matchup" ? `${char2WinrateString}% ${char2}` : `${char2WinrateString}% agree`}
                         </span>
                       </div>
                     )}
