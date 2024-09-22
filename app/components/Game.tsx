@@ -315,7 +315,7 @@ export default function Component() {
                   <div
                     className={`w-[40%] ${char1Border} rounded-xl min-h-[30px] sm:min-h-[40px] flex justify-end text-center items-center`}>
                     {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
-                    {winner === char1 && (
+                    {(winner === char1 || winner === "Even") && (
                       <div
                         className={`${char1Badge} ${winner === char1 ? "rounded" : "rounded-xl"} font-bold text-center justify-center self-end w-[80px] sm:w-[50%] min-h-[40px] sm:min-h-[50px] text-white text-xs sm:text-[16px] px-2 font-bold flex items-center`}
                         style={{minWidth: "40%", width: `${char1WinrateString}%`}}
@@ -356,14 +356,14 @@ export default function Component() {
                   <div
                     className={`w-[40%] ${char2Border} min-h-[30px] sm:min-h-[40px] rounded-xl flex justify-between text-center items-center`}>
                     {/*{skill !== "Matchup" && `Rank #${char1Rank}`}*/}
-                    {winner === char2 && (
+                    {(winner === char2 || winner === "Even") && (
                       <div
                         className={`${char2Badge} ${winner === char2 ? "rounded" : "rounded-xl"} font-bold text-center w-[80px] sm:w-[50%] min-h-[40px] sm:min-h-[50px] text-white text-xs sm:text-[16px] font-bold px-2.5 py-0.5 flex items-center justify-center`}
                         style={{minWidth: "40%", width: `${char2WinrateString}%`}}
                       >
                         <span
                           className={`hidden sm:flex`}>
-                            {skill === "Matchup" ? `${char2WinrateString}% picked ${char1}` : `${char2WinrateString}% agree`}
+                            {skill === "Matchup" ? `${char2WinrateString}% picked ${char2}` : `${char2WinrateString}% agree`}
                         </span>
                         <span
                           className={`flex sm:hidden max-w-[60px]`}>
