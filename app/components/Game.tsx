@@ -193,8 +193,8 @@ export default function Component() {
       return newNumGames;
     });
     console.log(`New game started! ${numGames} games played.`);
-    setChar1("Steve")
-    setChar2("Roy")
+    setChar1(getRandomCharacter())
+    setChar2(getRandomCharacter())
     setCurrentSkill(0)
 
   }
