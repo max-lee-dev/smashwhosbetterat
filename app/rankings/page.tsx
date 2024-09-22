@@ -16,7 +16,7 @@ export default function Ranking() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
   const [selectedSkill, setSelectedSkill] = useState<string | null>(null);
-  const [movementWinrates, setMovementWinrates] = useState<DocumentData | null>(null);
+  const [MovementWinrates, setMovementWinrates] = useState<DocumentData | null>(null);
   const [EdgeGuardingWinrates, setEdgeGuardingWinrates] = useState<DocumentData | null>(null);
   const [RecoveryWinrates, setRecoveryWinrates] = useState<DocumentData | null>(null);
   const [CombosWinrates, setCombosWinrates] = useState<DocumentData | null>(null);
@@ -26,7 +26,7 @@ export default function Ranking() {
 
 
   useEffect(() => {
-    if (!movementWinrates) {
+    if (!MovementWinrates) {
       getWinrateDocument("Movement").then((data) => {
         if (!data) return;
         setMovementWinrates(data);
@@ -186,7 +186,7 @@ export default function Ranking() {
 
   function chooseSkill(index: number) {
     setSkill(index);
-    const DocumentData = [movementWinrates, EdgeGuardingWinrates, RecoveryWinrates, CombosWinrates, DefenseWinrates, MatchupWinrates];
+    const DocumentData = [MovementWinrates, EdgeGuardingWinrates, RecoveryWinrates, CombosWinrates, DefenseWinrates, MatchupWinrates];
     setCurrentSkillWinrates(DocumentData[index]);
 
     const thisData = data?.find(d => d.skill === skills[index])?.data;
@@ -210,9 +210,9 @@ export default function Ranking() {
     const characterImage = CharacterPhotoUrls[realName];
 
     return (
-      <div className="font-mono flex items-center justify-between">
-        <div className="w-[100%] md:w-[50%] flex items-center">
-          <div className={"w-[40%] md:w-[15%]"}>
+      <div className="flex mt-2 items-center justify-between">
+        <div className="w-[100%] font-mono flex items-center">
+          <div className={"w-[40%] md:w-[8%]"}>
             <img src={characterImage} alt="avatar" className="h-16"/>
           </div>
           <div className="ml-2">
@@ -221,13 +221,13 @@ export default function Ranking() {
           </div>
         </div>
         <button
-          className="mr-4 bg-blue-500 text-xs sm:text-md text-white py-1 px-2 rounded"
+          className="mr-8 bg-blue-500 font-bold text-xs sm:text-sm text-white py-1 px-2 sm:px-6 rounded"
           onClick={() => openModal(realName, skill)}
         >
-          Data (wip)
+          Data
         </button>
         <div>
-          <p className="text-md font-bold text-gray-600">#{rank}</p>
+          <p className="text-md font-mono font-bold text-gray-600">#{rank}</p>
         </div>
 
       </div>
@@ -264,7 +264,7 @@ export default function Ranking() {
       <MatchupModal
         isOpen={isModalOpen}
         character={selectedCharacter}
-        matchupWinrates={CurrentSkillWinrates ?? movementWinrates}
+        matchupWinrates={CurrentSkillWinrates ?? MovementWinrates}
         skill={selectedSkill}
         onClose={closeModal}
       />
