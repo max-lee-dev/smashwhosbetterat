@@ -193,8 +193,8 @@ export default function Component() {
       return newNumGames;
     });
     console.log(`New game started! ${numGames} games played.`);
-    setChar1(getRandomCharacter())
-    setChar2(getRandomCharacter())
+    setChar1("Steve")
+    setChar2("Roy")
     setCurrentSkill(0)
 
   }
@@ -318,7 +318,7 @@ export default function Component() {
                     {(winner === char1 || winner === "Even") && (
                       <div
                         className={`${char1Badge} ${winner === char1 ? "rounded" : "rounded-xl"} font-bold text-center justify-center self-end w-[80px] sm:w-[50%] min-h-[40px] sm:min-h-[50px] text-white text-xs sm:text-[16px] px-2 font-bold flex items-center`}
-                        style={{minWidth: "100%", width: `${char1WinrateString}%`}}
+                        style={{minWidth: "40%", width: `${char1WinrateString}%`}}
                       >
                         <span
                           className={`hidden sm:flex`}>
@@ -359,7 +359,7 @@ export default function Component() {
                     {(winner === char2 || winner === "Even") && (
                       <div
                         className={`${char2Badge} ${winner === char2 ? "rounded" : "rounded-xl"} font-bold text-center w-[80px] sm:w-[50%] min-h-[40px] sm:min-h-[50px] text-white text-xs sm:text-[16px] font-bold px-2.5 py-0.5 flex items-center justify-center`}
-                        style={{minWidth: "100%", width: `${char2WinrateString}%`}}
+                        style={{minWidth: "50%", width: `${char2WinrateString}%`}}
                       >
                         <span
                           className={`hidden sm:flex`}>
