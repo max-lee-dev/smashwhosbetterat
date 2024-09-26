@@ -61,7 +61,7 @@ export default function Component() {
       setMatchupWinrates(data);
     })
 
-    setChar1(getRandomCharacter());
+    setChar1("Dr Mario");
     setChar2(getRandomCharacter());
   }, []);
 

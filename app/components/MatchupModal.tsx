@@ -68,9 +68,16 @@ function MatchupModal({isOpen, character, skill, matchupWinrates, onClose}: {
             <ul>
               {Object.entries(filteredMatchupData).map(([key, value], idx) => {
                 const opponent = key.replace("vs", "").replace(character, "").replace("Winrate", "").split("-")[0].trim();
+
                 const formattedKey = key.split("-")[1];
                 const hasEven = formattedKey.includes("Even");
                 const hasCharacter = formattedKey.includes(character);
+                if (character === "Mario" && opponent !== "Dr Mario" && opponent.includes("Dr")) {
+                  return;
+                }
+                if (character === "Link" && opponent !== "Young Link" && opponent !== "Toon Link" && (opponent.includes("Young") || opponent.includes("Toon"))) {
+                  return;
+                }
 
                 const losing = value < 0.5;
                 const badgeColor = losing && formattedKey.includes(character) ? "bg-red-200" :
